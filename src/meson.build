@@ -30,6 +30,8 @@ enum_header = custom_target(
   capture: true,
   command: [
     glib_mkenums,
+    '--identifier-prefix', 'Rsvg',
+    '--symbol-prefix', 'rsvg',
     '--fhead',
     '#if !defined (__RSVG_RSVG_H_INSIDE__) && !defined (RSVG_COMPILATION)\n#warning "Including <librsvg/librsvg-enum-types.h> directly is deprecated."\n#endif\n\n#ifndef __LIBRSVG_ENUM_TYPES_H__\n#define __LIBRSVG_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n',
     '--fprod',
@@ -51,6 +53,8 @@ enum_source = custom_target(
   capture: true,
   command: [
     glib_mkenums,
+    '--identifier-prefix', 'Rsvg',
+    '--symbol-prefix', 'rsvg',
     '--fhead',
     '#include "rsvg.h"',
     '--fprod',

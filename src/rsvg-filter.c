@@ -1099,15 +1099,15 @@ static void rsvg_filter_primitive_convolve_matrix_render(RsvgFilterPrimitive* se
                     }
                 tempresult = sum / upself->divisor + upself->bias;
 
-                                if (tempresult > 255)
+                if (tempresult > 255)
 
-                                    tempresult = 255;
+                    tempresult = 255;
 
-                                if (tempresult < 0)
+                if (tempresult < 0)
 
-                                    tempresult = 0;
+                    tempresult = 0;
 
-                                output_pixels[4 * x + y * rowstrideo + ch] = tempresult;
+                output_pixels[4 * x + y * rowstrideo + ch] = tempresult;
             }
             if (upself->preservealpha)
                 output_pixels[4 * x + y * rowstride + ctx->channelmap[3]] =
@@ -2793,7 +2793,7 @@ struct _RsvgFilterPrimitiveComposite {
 static void rsvg_filter_primitive_composite_render(RsvgFilterPrimitive* self, RsvgFilterContext* ctx) {
     guchar i;
     gint x, y;
-    gint rowstride, height, width;
+    gint rowstride, rowstride2, rowstrideo, height, width;
     RsvgIRect boundarys;
 
     guchar* in_pixels;

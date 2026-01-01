@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <text x="10" y="20" id="text1">
+    <xi:include href="secret.txt" parse="text"/>
+  </text>
+</svg>

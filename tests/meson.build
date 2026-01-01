@@ -10,6 +10,7 @@ test_programs = {
   'render-crash': ['render-crash.c'],
   'dimensions': ['dimensions.c'],
   'errors': ['errors.c'],
+  'security-check': ['security-check.c'],
 }
 
 test_env = environment({
