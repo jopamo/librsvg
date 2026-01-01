@@ -11,6 +11,7 @@ test_programs = {
   'dimensions': ['dimensions.c'],
   'errors': ['errors.c'],
   'security-check': ['security-check.c'],
+  'vulnerability-check': ['vulnerability_check.c'],
 }
 
 test_env_common = environment({

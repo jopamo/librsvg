@@ -397,7 +397,9 @@ static void rsvg_start_title(RsvgHandle* ctx) {
 
 static void rsvg_metadata_props_enumerate(const char* key, const char* value, gpointer user_data) {
     GString* metadata = (GString*)user_data;
-    g_string_append_printf(metadata, "%s=\"%s\" ", key, value);
+    char* escaped = g_markup_escape_text(value, -1);
+    g_string_append_printf(metadata, "%s=\"%s\" ", key, escaped);
+    g_free(escaped);
 }
 
 static void rsvg_metadata_handler_start(RsvgSaxHandler* self, const char* name, RsvgPropertyBag* atts) {
