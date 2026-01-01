@@ -1,0 +1,14 @@
+#pragma once
+
+#mesondefine HAVE_FLOAT_H
+#mesondefine HAVE_LC_MESSAGES
+#mesondefine HAVE_PANGOFT2
+#mesondefine HAVE_STRINGS_H
+#mesondefine HAVE_STRTOK_R
+#mesondefine HAVE_UNISTD_H
+
+#define PACKAGE "@PACKAGE@"
+#define PACKAGE_NAME "@PACKAGE_NAME@"
+#define PACKAGE_TARNAME "@PACKAGE_TARNAME@"
+#define PACKAGE_VERSION "@PACKAGE_VERSION@"
+#define VERSION "@PACKAGE_VERSION@"

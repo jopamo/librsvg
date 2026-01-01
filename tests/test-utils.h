@@ -6,17 +6,17 @@
 
 #include <gio/gio.h>
 
-G_BEGIN_DECLS 
+G_BEGIN_DECLS
 
-typedef gboolean (* AddTestFunc) (GFile *file);
+typedef gboolean (*AddTestFunc)(GFile* file);
 
-const gchar *test_utils_get_test_data_path      (void);
+const gchar* test_utils_get_test_data_path(void);
 
-void         test_utils_add_test_for_all_files  (const gchar    *prefix,
-                                                 GFile          *base,
-                                                 GFile          *file,
-                                                 GTestDataFunc   test_func,
-                                                 AddTestFunc     add_test_func);
+void test_utils_add_test_for_all_files(const gchar* prefix,
+                                       GFile* base,
+                                       GFile* file,
+                                       GTestDataFunc test_func,
+                                       AddTestFunc add_test_func);
 G_END_DECLS
 
 #endif /* TEST_UTILS_H */

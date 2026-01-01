@@ -26,66 +26,61 @@
 
 #include "rsvg-compat.h"
 
-int
-main (int argc, char **argv)
-{
-    GOptionContext *context;
+int main(int argc, char** argv) {
+    GOptionContext* context;
     int width = -1;
     int height = -1;
-    char **args = NULL;
-    GdkPixbuf *pixbuf = NULL;
-    GError *error = NULL;
+    char** args = NULL;
+    GdkPixbuf* pixbuf = NULL;
+    GError* error = NULL;
     int ret = 1;
 
     GOptionEntry options_table[] = {
-        { "width", 'w', 0, G_OPTION_ARG_INT, &width,
-          "width [optional; defaults to the SVG's width]", "WIDTH" },
-        { "height", 'h', 0, G_OPTION_ARG_INT, &height,
-          "height [optional; defaults to the SVG's height]", "HEIGHT" },
-        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &args, NULL, "INPUT-FILE OUTPUT-FILE" },
-        { NULL }
-    };
+        {"width", 'w', 0, G_OPTION_ARG_INT, &width, "width [optional; defaults to the SVG's width]", "WIDTH"},
+        {"height", 'h', 0, G_OPTION_ARG_INT, &height, "height [optional; defaults to the SVG's height]", "HEIGHT"},
+        {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &args, NULL, "INPUT-FILE OUTPUT-FILE"},
+        {NULL}};
 
     setlocale(LC_ALL, "");
 
     /* Use the locally built rsvg loader, not the system one */
-    g_setenv ("GDK_PIXBUF_MODULE_FILE", "./gdk-pixbuf.loaders", TRUE);
+    g_setenv("GDK_PIXBUF_MODULE_FILE", "./gdk-pixbuf.loaders", TRUE);
 
     RSVG_G_TYPE_INIT;
 
-    context = g_option_context_new ("- Pixbuf Test Loader");
-    g_option_context_add_main_entries (context, options_table, NULL);
-    g_option_context_parse (context, &argc, &argv, &error);
-    g_option_context_free (context);
+    context = g_option_context_new("- Pixbuf Test Loader");
+    g_option_context_add_main_entries(context, options_table, NULL);
+    g_option_context_parse(context, &argc, &argv, &error);
+    g_option_context_free(context);
     if (error)
-      goto done;
+        goto done;
 
-    if (args == NULL || g_strv_length (args) != 2) {
-        g_printerr ("Need to specify input and output filenames\n");
+    if (args == NULL || g_strv_length(args) != 2) {
+        g_printerr("Need to specify input and output filenames\n");
         goto done;
     }
 
-    pixbuf = gdk_pixbuf_new_from_file_at_size (args[0], width, height, &error);
+    pixbuf = gdk_pixbuf_new_from_file_at_size(args[0], width, height, &error);
     if (pixbuf == NULL)
-      goto done;
+        goto done;
 
-    if (!gdk_pixbuf_save (pixbuf, args[1], "png", &error, NULL))
-      goto done;
+    if (!gdk_pixbuf_save(pixbuf, args[1], "png", &error, NULL))
+        goto done;
 
     /* Success! */
     ret = 0;
 
-  done:
+done:
 
     if (error) {
-      g_printerr ("Error: %s\n", error->message);
-      g_error_free (error);
+        g_printerr("Error: %s\n", error->message);
+        g_error_free(error);
     }
 
     if (pixbuf)
-      g_object_unref (pixbuf);
+        g_object_unref(pixbuf);
 
-    g_strfreev (args);
+    g_strfreev(args);
 
     return ret;
 }

@@ -37,23 +37,17 @@ particular sections of the code.
 Running the test suite
 ----------------------
 
-The easiest way to run all the tests is to go to librsvg's toplevel
-directory and run `make check`.  This will run both the small unit
-tests and the black box tests in this `librsvg/tests` directory.
+After configuring with Meson, run the full suite from the repository
+root:
 
-If you want to run just the black box tests, go into this
-`librsvg/tests` directory and run `make check`.  If you want to run
-the unit tests, go to `librsvg/rust` and run `cargo test`.
+```
+meson test -C builddir
+```
 
-Those commands will yield exit code 0 if all the tests pass, or
-nonzero if some tests fail.
-
-Running `make check` will produce a `test/test-suite.log` file.  You can
-see this file for the details of failed tests.
-
-Additionally, all the black box tests (rsvg-test, crash, etc.) will
-produce a test report in a text file.  In the tests directory, you can
-see `rsvg-test.log`, `crash.log`, etc., respectively.
+This runs the black-box tests above along with smaller unit checks.
+Results are written under `builddir/meson-logs/`.  You can also run an
+individual test binary directly from `builddir/tests/<name>` if you
+want to focus on a single area.
 
 
 # Tests and test fixtures
@@ -99,7 +93,7 @@ As of 2016/Nov/03 we have an informal organization of these files:
 
 ### Examining failed reference tests
 
-Let's say you run `make check` and see that one of the tests fails.
+Let's say you run `meson test -C builddir` and see that one of the tests fails.
 For example, `rsvg-test.log` may have lines that look like
 
 ```
@@ -168,7 +162,7 @@ rsvg-convert -o fixtures/reftests/foo/bar-ref.png fixtures/reftests/foo/bar.svg
 This is just the normal rsvg-convert program doing its job; it will
 just render the SVG image and output it to the specified PNG file.
 
-You can then run `make check` again and ensure that the tests pass.
+You can then run `meson test -C builddir` again and ensure that the tests pass.
 
 
 ### Issues with the official SVG test suite

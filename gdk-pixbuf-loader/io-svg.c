@@ -32,185 +32,150 @@
 #define _(string) (string)
 
 typedef struct {
-        RsvgHandle                 *handle;
+    RsvgHandle* handle;
 
-        GdkPixbufModuleUpdatedFunc  updated_func;
-        GdkPixbufModulePreparedFunc prepared_func;
-        GdkPixbufModuleSizeFunc     size_func;
+    GdkPixbufModuleUpdatedFunc updated_func;
+    GdkPixbufModulePreparedFunc prepared_func;
+    GdkPixbufModuleSizeFunc size_func;
 
-        gboolean                    first_write;
+    gboolean first_write;
 
-        gpointer                    user_data;
+    gpointer user_data;
 } SvgContext;
 
-G_MODULE_EXPORT void fill_vtable (GdkPixbufModule *module);
-G_MODULE_EXPORT void fill_info (GdkPixbufFormat *info);
+G_MODULE_EXPORT void fill_vtable(GdkPixbufModule* module);
+G_MODULE_EXPORT void fill_info(GdkPixbufFormat* info);
 
-enum {
-        ERROR_WRITING = 1,
-        ERROR_DISPLAYING_IMAGE
-} RsvgLoaderErrorReasons;
+enum { ERROR_WRITING = 1, ERROR_DISPLAYING_IMAGE } RsvgLoaderErrorReasons;
 
-static void
-rsvg_propagate_error (GError ** err,
-                      const char * reason,
-                      gint code)
-{
-        if (err) {
-                *err = NULL;
-                g_set_error (err, rsvg_error_quark (), code, "%s", reason);
-        }
+static void rsvg_propagate_error(GError** err, const char* reason, gint code) {
+    if (err) {
+        *err = NULL;
+        g_set_error(err, rsvg_error_quark(), code, "%s", reason);
+    }
 }
 
-static gpointer
-gdk_pixbuf__svg_image_begin_load (GdkPixbufModuleSizeFunc size_func,
-                                  GdkPixbufModulePreparedFunc prepared_func,
-                                  GdkPixbufModuleUpdatedFunc  updated_func,
-                                  gpointer user_data,
-                                  GError **error)
-{
-        SvgContext *context    = g_new0 (SvgContext, 1);
+static gpointer gdk_pixbuf__svg_image_begin_load(GdkPixbufModuleSizeFunc size_func,
+                                                 GdkPixbufModulePreparedFunc prepared_func,
+                                                 GdkPixbufModuleUpdatedFunc updated_func,
+                                                 gpointer user_data,
+                                                 GError** error) {
+    SvgContext* context = g_new0(SvgContext, 1);
 
-        if (error)
-                *error = NULL;
+    if (error)
+        *error = NULL;
 
-        context->first_write   = TRUE;
-        context->size_func     = size_func;
+    context->first_write = TRUE;
+    context->size_func = size_func;
 
-        context->prepared_func = prepared_func;
-        context->updated_func  = updated_func;
-        context->user_data     = user_data;
+    context->prepared_func = prepared_func;
+    context->updated_func = updated_func;
+    context->user_data = user_data;
 
-        return context;
+    return context;
 }
 
-static void
-emit_updated (SvgContext *context, GdkPixbuf *pixbuf)
-{
-        if (context->updated_func != NULL)
-                (* context->updated_func) (pixbuf,
-                                           0, 0,
-                                           gdk_pixbuf_get_width (pixbuf),
-                                           gdk_pixbuf_get_height (pixbuf),
-                                           context->user_data);
+static void emit_updated(SvgContext* context, GdkPixbuf* pixbuf) {
+    if (context->updated_func != NULL)
+        (*context->updated_func)(pixbuf, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf),
+                                 context->user_data);
 }
 
-static void
-emit_prepared (SvgContext *context, GdkPixbuf *pixbuf)
-{
-        if (context->prepared_func != NULL)
-                (* context->prepared_func) (pixbuf, NULL, context->user_data);
+static void emit_prepared(SvgContext* context, GdkPixbuf* pixbuf) {
+    if (context->prepared_func != NULL)
+        (*context->prepared_func)(pixbuf, NULL, context->user_data);
 }
 
-static gboolean
-gdk_pixbuf__svg_image_load_increment (gpointer data,
-				      const guchar *buf, guint size,
-				      GError **error)
-{
-        SvgContext *context = (SvgContext *)data;
+static gboolean gdk_pixbuf__svg_image_load_increment(gpointer data, const guchar* buf, guint size, GError** error) {
+    SvgContext* context = (SvgContext*)data;
 
-        if (error)
-                *error = NULL;
+    if (error)
+        *error = NULL;
 
-        if (context->first_write == TRUE) {
-                context->first_write = FALSE;
+    if (context->first_write == TRUE) {
+        context->first_write = FALSE;
 
-                context->handle = rsvg_handle_new ();
-
-                if (!context->handle) {
-                        rsvg_propagate_error (error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
-                        return FALSE;
-                }
-
-                rsvg_handle_set_size_callback (context->handle, context->size_func, context->user_data, NULL);
-        }
+        context->handle = rsvg_handle_new();
 
         if (!context->handle) {
-                rsvg_propagate_error (error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
-                return FALSE;
+            rsvg_propagate_error(error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
+            return FALSE;
         }
 
-        if (!rsvg_handle_write (context->handle, buf, size, error)) {
-                rsvg_propagate_error (error, _("Error writing"), ERROR_WRITING);
-                return FALSE;
-        }
+        rsvg_handle_set_size_callback(context->handle, context->size_func, context->user_data, NULL);
+    }
 
-        return TRUE;
+    if (!context->handle) {
+        rsvg_propagate_error(error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
+        return FALSE;
+    }
+
+    if (!rsvg_handle_write(context->handle, buf, size, error)) {
+        rsvg_propagate_error(error, _("Error writing"), ERROR_WRITING);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
-static gboolean
-gdk_pixbuf__svg_image_stop_load (gpointer data, GError **error)
-{
-        SvgContext *context = (SvgContext *)data;
-        GdkPixbuf *pixbuf;
-        gboolean result = TRUE;
+static gboolean gdk_pixbuf__svg_image_stop_load(gpointer data, GError** error) {
+    SvgContext* context = (SvgContext*)data;
+    GdkPixbuf* pixbuf;
+    gboolean result = TRUE;
 
-        if (error)
-                *error = NULL;
+    if (error)
+        *error = NULL;
 
-        if (!context->handle) {
-                rsvg_propagate_error (error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
-                return FALSE;
-        }
+    if (!context->handle) {
+        rsvg_propagate_error(error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
+        return FALSE;
+    }
 
-        rsvg_handle_close (context->handle, error);
+    rsvg_handle_close(context->handle, error);
 
-        pixbuf = rsvg_handle_get_pixbuf (context->handle);
+    pixbuf = rsvg_handle_get_pixbuf(context->handle);
 
-        if (pixbuf != NULL) {
-                emit_prepared (context, pixbuf);
-                emit_updated (context, pixbuf);
-                g_object_unref (pixbuf);
-        }
-        else {
-                rsvg_propagate_error (error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
-                result = FALSE;
-        }
+    if (pixbuf != NULL) {
+        emit_prepared(context, pixbuf);
+        emit_updated(context, pixbuf);
+        g_object_unref(pixbuf);
+    }
+    else {
+        rsvg_propagate_error(error, _("Error displaying image"), ERROR_DISPLAYING_IMAGE);
+        result = FALSE;
+    }
 
-        g_object_unref (context->handle);
-        g_free (context);
+    g_object_unref(context->handle);
+    g_free(context);
 
-        return result;
+    return result;
 }
 
-void
-fill_vtable (GdkPixbufModule *module)
-{
-        module->begin_load     = gdk_pixbuf__svg_image_begin_load;
-        module->stop_load      = gdk_pixbuf__svg_image_stop_load;
-        module->load_increment = gdk_pixbuf__svg_image_load_increment;
+void fill_vtable(GdkPixbufModule* module) {
+    module->begin_load = gdk_pixbuf__svg_image_begin_load;
+    module->stop_load = gdk_pixbuf__svg_image_stop_load;
+    module->load_increment = gdk_pixbuf__svg_image_load_increment;
 }
 
-void
-fill_info (GdkPixbufFormat *info)
-{
-        static const GdkPixbufModulePattern signature[] = {
-                {  " <svg",  "*    ", 100 },
-                {  " <!DOCTYPE svg",  "*             ", 100 },
-                { NULL, NULL, 0 }
-        };
+void fill_info(GdkPixbufFormat* info) {
+    static const GdkPixbufModulePattern signature[] = {
+        {" <svg", "*    ", 100}, {" <!DOCTYPE svg", "*             ", 100}, {NULL, NULL, 0}};
 
-        static const gchar *mime_types[] = { /* yes folks, i actually have run into all of these in the wild... */
-                "image/svg+xml",
-                "image/svg",
-                "image/svg-xml",
-                "image/vnd.adobe.svg+xml",
-                "text/xml-svg",
-                "image/svg+xml-compressed",
-                NULL
-        };
-        static const gchar *extensions[] = {
-                "svg",
-                "svgz",
-                "svg.gz",
-                NULL
-        };
+    static const gchar* mime_types[] = {/* yes folks, i actually have run into all of these in the wild... */
+                                        "image/svg+xml",
+                                        "image/svg",
+                                        "image/svg-xml",
+                                        "image/vnd.adobe.svg+xml",
+                                        "text/xml-svg",
+                                        "image/svg+xml-compressed",
+                                        NULL};
+    static const gchar* extensions[] = {"svg", "svgz", "svg.gz", NULL};
 
-        info->name        = "svg";
-        info->signature   = (GdkPixbufModulePattern *) signature;
-        info->description = _("Scalable Vector Graphics");
-        info->mime_types  = (gchar **) mime_types;
-        info->extensions  = (gchar **) extensions;
-        info->flags       = GDK_PIXBUF_FORMAT_SCALABLE | GDK_PIXBUF_FORMAT_THREADSAFE;
-        info->license     = "LGPL";
+    info->name = "svg";
+    info->signature = (GdkPixbufModulePattern*)signature;
+    info->description = _("Scalable Vector Graphics");
+    info->mime_types = (gchar**)mime_types;
+    info->extensions = (gchar**)extensions;
+    info->flags = GDK_PIXBUF_FORMAT_SCALABLE | GDK_PIXBUF_FORMAT_THREADSAFE;
+    info->license = "LGPL";
 }
