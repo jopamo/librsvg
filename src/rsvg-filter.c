@@ -1099,12 +1099,15 @@ static void rsvg_filter_primitive_convolve_matrix_render(RsvgFilterPrimitive* se
                     }
                 tempresult = sum / upself->divisor + upself->bias;
 
-                if (tempresult > 255)
-                    tempresult = 255;
-                if (tempresult < 0)
-                    tempresult = 0;
+                                if (tempresult > 255)
 
-                output_pixels[4 * x + y * rowstride + ch] = tempresult;
+                                    tempresult = 255;
+
+                                if (tempresult < 0)
+
+                                    tempresult = 0;
+
+                                output_pixels[4 * x + y * rowstrideo + ch] = tempresult;
             }
             if (upself->preservealpha)
                 output_pixels[4 * x + y * rowstride + ctx->channelmap[3]] =
