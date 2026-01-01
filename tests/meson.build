@@ -12,6 +12,7 @@ test_programs = {
   'errors': ['errors.c'],
   'security-check': ['security-check.c'],
   'vulnerability-check': ['vulnerability_check.c'],
+  'xss-checks': ['xss_checks.c'],
 }
 
 test_env_common = environment({

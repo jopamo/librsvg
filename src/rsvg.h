@@ -192,7 +192,9 @@ void rsvg_handle_internal_set_testing(RsvgHandle* handle, gboolean testing);
 
 #include "rsvg-deprecated.h"
 
-G_END_DECLS
+#ifdef __cplusplus
+}
+#endif
 
 #include "librsvg-enum-types.h"
 #include "librsvg-features.h"
