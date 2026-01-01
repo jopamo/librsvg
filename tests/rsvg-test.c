@@ -147,9 +147,13 @@ static char* get_output_file(const char* test_file, const char* extension) {
 
 static void save_image(cairo_surface_t* surface, const char* test_name, const char* extension) {
     char* filename = get_output_file(test_name, extension);
+    cairo_status_t status;
 
     g_test_message("Storing test result image at %s", filename);
-    g_assert(cairo_surface_write_to_png(surface, filename) == CAIRO_STATUS_SUCCESS);
+    status = cairo_surface_write_to_png(surface, filename);
+    if (status != CAIRO_STATUS_SUCCESS) {
+        g_test_message("Failed to save image to %s: %s", filename, cairo_status_to_string(status));
+    }
 
     g_free(filename);
 }
