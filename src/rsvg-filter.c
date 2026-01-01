@@ -1003,7 +1003,7 @@ static void rsvg_filter_primitive_convolve_matrix_render(RsvgFilterPrimitive* se
     guchar ch;
     gint x, y;
     gint i, j;
-    gint rowstride, height, width;
+    gint rowstride, rowstrideo, height, width;
     RsvgIRect boundarys;
 
     guchar* in_pixels;
@@ -1053,6 +1053,7 @@ static void rsvg_filter_primitive_convolve_matrix_render(RsvgFilterPrimitive* se
     }
 
     output_pixels = cairo_image_surface_get_data(output);
+    rowstrideo = cairo_image_surface_get_stride(output);
 
     for (y = boundarys.y0; y < boundarys.y1; y++)
         for (x = boundarys.x0; x < boundarys.x1; x++) {
