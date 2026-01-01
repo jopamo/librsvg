@@ -2028,11 +2028,10 @@ void rsvg_drawing_ctx_increase_num_elements_acquired(RsvgDrawingCtx* draw_ctx) {
  * [billion laughs attack]: https://bitbucket.org/tiran/defusedxml
  */
 gboolean rsvg_drawing_ctx_limits_exceeded(RsvgDrawingCtx* draw_ctx) {
-#ifdef __SANITIZE_ADDRESS__
-    return draw_ctx->num_elements_acquired > 1000;
-#else
-    return draw_ctx->num_elements_acquired > 500000;
-#endif
+    /* Hard limit for "billion laughs" mitigation.
+     * 1024 is enough for reasonably complex files while stopping exponential attacks quickly.
+     */
+    return draw_ctx->num_elements_acquired > 1024;
 }
 
 RsvgNode* rsvg_drawing_ctx_acquire_node_ref(RsvgDrawingCtx* ctx, RsvgNode* node) {
