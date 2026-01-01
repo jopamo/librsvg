@@ -620,6 +620,9 @@ static gboolean loading_limits_exceeded(RsvgHandle* handle) {
      * in an attempt to exhaust memory.  We don't allow loading more than
      * this number of elements during the initial streaming load process.
      */
+    if (handle->priv->is_testing) {
+        return handle->priv->num_loaded_elements > 20000;
+    }
     return handle->priv->num_loaded_elements > 200000;
 }
 

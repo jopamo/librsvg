@@ -7,7 +7,7 @@
 #include "test-utils.h"
 
 static void test_xinclude_disabled(void) {
-    char* file_path = g_build_filename(test_utils_get_test_data_path(), "fixtures", "xinclude.svg", NULL);
+    char* file_path = g_build_filename(test_utils_get_test_data_path(), "xinclude.svg", NULL);
     GError* error = NULL;
     RsvgHandle* handle = rsvg_handle_new_from_file(file_path, &error);
 
@@ -30,7 +30,7 @@ static void test_xinclude_disabled(void) {
 }
 
 static void test_tref_removed(void) {
-    char* file_path = g_build_filename(test_utils_get_test_data_path(), "fixtures", "tref.svg", NULL);
+    char* file_path = g_build_filename(test_utils_get_test_data_path(), "tref.svg", NULL);
     GError* error = NULL;
     RsvgHandle* handle = rsvg_handle_new_from_file(file_path, &error);
 

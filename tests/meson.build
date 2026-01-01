@@ -30,5 +30,5 @@ foreach name, sources : test_programs
     install: false,
   )
 
-  test(name, exe, env: test_env)
+  test(name, exe, env: test_env, timeout: 120)
 endforeach

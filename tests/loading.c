@@ -51,8 +51,9 @@ static void load_n_bytes_at_a_time(gconstpointer data) {
     g_assert(rsvg_handle_close(handle, NULL) != FALSE);
 
     g_object_unref(handle);
-
+    fclose(file);
     g_free(buf);
+    g_free(filename);
 }
 
 static TestData tests[] = {

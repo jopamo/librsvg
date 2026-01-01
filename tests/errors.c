@@ -24,13 +24,29 @@ static void test_loading_error(gconstpointer data) {
     char* filename = get_test_filename(basename);
     RsvgHandle* handle;
     GError* error = NULL;
+    gchar* file_contents;
+    gsize length;
 
-    handle = rsvg_handle_new_from_file(filename, &error);
+    if (g_file_get_contents(filename, &file_contents, &length, NULL)) {
+        handle = rsvg_handle_new();
+        rsvg_handle_internal_set_testing(handle, TRUE);
+
+        if (rsvg_handle_write(handle, (const guchar*)file_contents, length, &error)) {
+            rsvg_handle_close(handle, &error);
+        }
+
+        g_free(file_contents);
+    }
+    else {
+        g_assert_not_reached();
+    }
+
     g_free(filename);
 
-    g_assert(handle == NULL);
+    g_assert(error != NULL);
     g_assert(g_error_matches(error, RSVG_ERROR, RSVG_ERROR_FAILED));
 
+    g_object_unref(handle);
     g_error_free(error);
 }
 
