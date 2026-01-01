@@ -1670,7 +1670,7 @@ gboolean rsvg_handle_write(RsvgHandle* handle, const guchar* buf, gsize count, G
 
             case RSVG_HANDLE_STATE_READING_COMPRESSED:
                 g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(priv->compressed_input_stream),
-                                               g_memdup(buf, count), count, (GDestroyNotify)g_free);
+                                               g_memdup2(buf, count), count, (GDestroyNotify)g_free);
                 return TRUE;
 
             case RSVG_HANDLE_STATE_READING:

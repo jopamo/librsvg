@@ -191,6 +191,7 @@ RsvgHandle* rsvg_handle_new_from_file(const gchar* file_name, GError** error);
 void rsvg_handle_internal_set_testing(RsvgHandle* handle, gboolean testing);
 
 /* BEGIN deprecated APIs. Do not use! */
+/*< private >*/
 
 #ifndef __GI_SCANNER__
 
