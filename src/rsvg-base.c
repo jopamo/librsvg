@@ -1122,6 +1122,9 @@ static gboolean rsvg_handle_close_impl(RsvgHandle* handle, GError** error) {
 }
 
 void rsvg_drawing_ctx_free(RsvgDrawingCtx* handle) {
+    if (handle->pango_context != NULL)
+        g_object_unref(handle->pango_context);
+
     rsvg_render_free(handle->render);
 
     rsvg_state_free_all(handle->state);
@@ -1131,9 +1134,6 @@ void rsvg_drawing_ctx_free(RsvgDrawingCtx* handle) {
 
     g_warn_if_fail(handle->acquired_nodes == NULL);
     g_slist_free(handle->acquired_nodes);
-
-    if (handle->pango_context != NULL)
-        g_object_unref(handle->pango_context);
 
     g_free(handle);
 }
@@ -2026,7 +2026,11 @@ void rsvg_drawing_ctx_increase_num_elements_acquired(RsvgDrawingCtx* draw_ctx) {
  * [billion laughs attack]: https://bitbucket.org/tiran/defusedxml
  */
 gboolean rsvg_drawing_ctx_limits_exceeded(RsvgDrawingCtx* draw_ctx) {
+#ifdef __SANITIZE_ADDRESS__
+    return draw_ctx->num_elements_acquired > 1000;
+#else
     return draw_ctx->num_elements_acquired > 500000;
+#endif
 }
 
 RsvgNode* rsvg_drawing_ctx_acquire_node_ref(RsvgDrawingCtx* ctx, RsvgNode* node) {

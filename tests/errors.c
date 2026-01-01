@@ -68,6 +68,8 @@ static void test_instancing_limit(gconstpointer data) {
 
     g_assert(!rsvg_handle_render_cairo(handle, cr));
 
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
     g_object_unref(handle);
 }
 

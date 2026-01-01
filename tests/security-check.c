@@ -3,6 +3,7 @@
 #include <locale.h>
 #include <glib.h>
 #include <cairo.h>
+#include <fontconfig/fontconfig.h>
 #include "rsvg.h"
 #include "test-utils.h"
 
@@ -53,6 +54,7 @@ static void test_tref_removed(void) {
 }
 
 int main(int argc, char** argv) {
+    int result;
     g_test_init(&argc, &argv, NULL);
     /* test_utils_setup might not be needed if we don't use the complex fixture finder,
        but let's see test-utils.c to be sure. */
@@ -60,5 +62,10 @@ int main(int argc, char** argv) {
     g_test_add_func("/security/xinclude-disabled", test_xinclude_disabled);
     g_test_add_func("/security/tref-removed", test_tref_removed);
 
-    return g_test_run();
+    result = g_test_run();
+
+    rsvg_cleanup();
+    FcFini();
+
+    return result;
 }

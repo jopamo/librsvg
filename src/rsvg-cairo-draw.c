@@ -297,13 +297,14 @@ static void _set_source_rsvg_pattern(RsvgDrawingCtx* ctx, RsvgPattern* rsvg_patt
 
     matrix = affine;
     if (cairo_matrix_invert(&matrix) != CAIRO_STATUS_SUCCESS)
-        goto out;
+        goto cleanup;
 
     cairo_pattern_set_matrix(pattern, &matrix);
     cairo_pattern_set_filter(pattern, CAIRO_FILTER_BEST);
 
     cairo_set_source(cr_render, pattern);
 
+cleanup:
     cairo_pattern_destroy(pattern);
     cairo_destroy(cr_pattern);
     cairo_surface_destroy(surface);

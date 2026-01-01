@@ -1,6 +1,7 @@
 /* vim: set ts=4 nowrap ai expandtab sw=4: */
 
 #include <glib.h>
+#include <fontconfig/fontconfig.h>
 #include "rsvg.h"
 #include "rsvg-compat.h"
 #include "test-utils.h"
@@ -59,6 +60,7 @@ int main(int argc, char* argv[]) {
     result = g_test_run();
 
     rsvg_cleanup();
+    FcFini();
 
     return result;
 }

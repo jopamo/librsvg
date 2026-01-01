@@ -411,8 +411,15 @@ static PangoLayout* rsvg_text_create_layout(RsvgDrawingCtx* ctx,
     pango_font_description_set_variant(font_desc, state->font_variant);
     pango_font_description_set_weight(font_desc, state->font_weight);
     pango_font_description_set_stretch(font_desc, state->font_stretch);
-    pango_font_description_set_size(font_desc,
-                                    _rsvg_css_normalize_font_size(state, ctx) * PANGO_SCALE / ctx->dpi_y * 72);
+
+    {
+        double dpi_y = ctx->dpi_y;
+        if (dpi_y <= 0.0)
+            dpi_y = 72.0;
+
+        pango_font_description_set_size(font_desc,
+                                        _rsvg_css_normalize_font_size(state, ctx) * PANGO_SCALE / dpi_y * 72);
+    }
 
     layout = pango_layout_new(context);
     pango_layout_set_font_description(layout, font_desc);

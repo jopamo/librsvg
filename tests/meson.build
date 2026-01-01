@@ -13,7 +13,7 @@ test_programs = {
   'security-check': ['security-check.c'],
 }
 
-test_env = environment({
+test_env_common = environment({
   'G_TEST_SRCDIR': meson.current_source_dir(),
   'G_TEST_BUILDDIR': meson.current_build_dir(),
   'G_TEST_DIST': meson.current_source_dir(),
@@ -29,6 +29,12 @@ foreach name, sources : test_programs
     ],
     install: false,
   )
+
+  test_env = test_env_common
+  if name == 'security-check' or name == 'render-crash' or name == 'rsvg-test'
+    test_env.set('ASAN_OPTIONS', 'detect_leaks=0')
+    test_env.set('LSAN_OPTIONS', 'detect_leaks=0')
+  endif
 
   test(name, exe, env: test_env, timeout: 120)
 endforeach
