@@ -170,7 +170,6 @@ pkgconfig.generate(
     'pangocairo',
     'cairo',
     'cairo-png',
-    'libcroco-0.6',
     'fontconfig',
   ],
 )

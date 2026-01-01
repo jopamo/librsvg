@@ -58,7 +58,8 @@ GType rsvg_handle_get_type(void);
  *
  * An enumeration representing possible errors
  */
-typedef enum { RSVG_ERROR_FAILED } RsvgError;
+typedef enum /*< enum >*/
+{ RSVG_ERROR_FAILED } RsvgError;
 
 #define RSVG_ERROR (rsvg_error_quark())
 GQuark rsvg_error_quark(void) G_GNUC_CONST;
@@ -192,9 +193,7 @@ void rsvg_handle_internal_set_testing(RsvgHandle* handle, gboolean testing);
 
 #include "rsvg-deprecated.h"
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #include "librsvg-enum-types.h"
 #include "librsvg-features.h"

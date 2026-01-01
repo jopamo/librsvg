@@ -29,7 +29,6 @@ pangoft2_dep = dependency('pangoft2', version: '>=1.38.0')
 fontconfig_dep = dependency('fontconfig')
 cairo_dep = dependency('cairo', version: '>=1.2.0')
 cairo_png_dep = dependency('cairo-png', version: '>=1.2.0')
-croco_dep = dependency('libcroco-0.6', version: '>=0.6.1')
 
 gtk_feature = get_option('gtk_demo')
 gtk_dep = dependency('gtk+-3.0', version: '>=3.10.0', required: gtk_feature)
@@ -66,6 +65,7 @@ configure_file(
 )
 
 config_inc = include_directories('.')
+subdir('libcroco')
 src_inc = include_directories('src')
 incdir = join_paths(get_option('includedir'), 'librsvg-2.0', 'librsvg')
 
