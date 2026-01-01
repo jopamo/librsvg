@@ -1886,7 +1886,7 @@ struct _RsvgFilterPrimitiveOffset {
 static void rsvg_filter_primitive_offset_render(RsvgFilterPrimitive* self, RsvgFilterContext* ctx) {
     guchar ch;
     gint x, y;
-    gint rowstride, rowstride2, rowstrideo, height, width;
+    gint rowstride, height, width;
     RsvgIRect boundarys;
 
     guchar* in_pixels;
