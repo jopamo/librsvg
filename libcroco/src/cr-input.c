@@ -189,7 +189,7 @@ CRInput* cr_input_new_from_uri(const gchar* a_file_uri, enum CREncoding a_enc) {
     enum CRStatus status = CR_OK;
     FILE* file_ptr = NULL;
     guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = {0};
-    gulong nb_read = 0, len = 0, buf_size = 0;
+    gulong nb_read = 0, len = 0;
     gboolean loop = TRUE;
     guchar* buf = NULL;
 
@@ -229,7 +229,6 @@ CRInput* cr_input_new_from_uri(const gchar* a_file_uri, enum CREncoding a_enc) {
             buf = g_realloc(buf, len + CR_INPUT_MEM_CHUNK_SIZE);
             memcpy(buf + len, tmp_buf, nb_read);
             len += nb_read;
-            buf_size += CR_INPUT_MEM_CHUNK_SIZE;
         }
     }
 
