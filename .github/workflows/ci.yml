@@ -303,5 +303,7 @@ jobs:
           }
           EOF
           export PKG_CONFIG_PATH="$PWD/build-installed-headers/install-root/usr/local/lib/pkgconfig:$PWD/build-installed-headers/install-root/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PWD/build-installed-headers/install-root/usr/lib/pkgconfig:$PWD/build-installed-headers/install-root/usr/lib/x86_64-linux-gnu/pkgconfig"
+          pc_file=$(find build-installed-headers/install-root -name librsvg-2.0.pc)
+          sed -i "s|^prefix=.*|prefix=$PWD/build-installed-headers/install-root/usr/local|" "$pc_file"
           cc build-installed-headers/header-check.c -o build-installed-headers/header-check \
-            $(pkg-config --define-variable=prefix="$PWD/build-installed-headers/install-root/usr/local" --cflags --libs librsvg-2.0)
+            $(pkg-config --cflags --libs librsvg-2.0)
