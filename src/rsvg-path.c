@@ -315,10 +315,10 @@ void rsvg_path_builder_arc(RsvgPathBuilder* builder,
 /* supply defaults for missing parameters, assuming relative coordinates
    are to be interpreted as x,y */
 static void rsvg_parse_path_default_xy(RSVGParsePathCtx* ctx, int n_params) {
-    int i;
+    unsigned int i;
 
     if (ctx->rel) {
-        for (i = ctx->param; i < n_params; i++) {
+        for (i = (unsigned int)ctx->param; i < (unsigned int)n_params; i++) {
             /* we shouldn't get 0 here (usually ctx->param > 0 as
                precondition) */
             if (i == 0)
@@ -330,7 +330,7 @@ static void rsvg_parse_path_default_xy(RSVGParsePathCtx* ctx, int n_params) {
         }
     }
     else {
-        for (i = ctx->param; i < n_params; i++)
+        for (i = (unsigned int)ctx->param; i < (unsigned int)n_params; i++)
             ctx->params[i] = 0.0;
     }
 }
