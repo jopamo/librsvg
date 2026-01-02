@@ -25,6 +25,7 @@
 */
 
 #include "config.h"
+#define _GNU_SOURCE 1
 #include "rsvg-css.h"
 #include "rsvg-private.h"
 #include "rsvg-styles.h"
@@ -715,12 +716,13 @@ gchar** rsvg_css_parse_list(const char* in_str, guint* out_list_len) {
 
     if (string_list) {
         GSList* slist;
+        guint i = n;
 
         string_array = g_new(gchar*, n + 1);
 
-        string_array[n--] = NULL;
+        string_array[i--] = NULL;
         for (slist = string_list; slist; slist = slist->next)
-            string_array[n--] = (gchar*)slist->data;
+            string_array[i--] = (gchar*)slist->data;
 
         g_slist_free(string_list);
     }

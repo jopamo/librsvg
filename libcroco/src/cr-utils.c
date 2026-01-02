@@ -23,6 +23,7 @@
 
 #include "cr-utils.h"
 #include "cr-string.h"
+#include "cr-safe-math.h"
 
 /**
  *@file:
@@ -67,7 +68,7 @@
  */
 enum CRStatus cr_utils_utf8_str_len_as_ucs4(const guchar* a_in_start, const guchar* a_in_end, gulong* a_len) {
     guchar* byte_ptr = NULL;
-    gint len = 0;
+    gulong len = 0;
 
     /*
      *to store the final decoded
@@ -179,7 +180,7 @@ enum CRStatus cr_utils_utf8_str_len_as_ucs4(const guchar* a_in_start, const guch
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus cr_utils_ucs4_str_len_as_utf8(const guint32* a_in_start, const guint32* a_in_end, gulong* a_len) {
-    gint len = 0;
+    gulong len = 0;
     guint32* char_ptr = NULL;
 
     g_return_val_if_fail(a_in_start && a_in_end && a_len, CR_BAD_PARAM_ERROR);
@@ -222,7 +223,7 @@ enum CRStatus cr_utils_ucs4_str_len_as_utf8(const guint32* a_in_start, const gui
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus cr_utils_ucs1_str_len_as_utf8(const guchar* a_in_start, const guchar* a_in_end, gulong* a_len) {
-    gint len = 0;
+    gulong len = 0;
     guchar* char_ptr = NULL;
 
     g_return_val_if_fail(a_in_start && a_in_end && a_len, CR_BAD_PARAM_ERROR);
@@ -552,7 +553,7 @@ enum CRStatus cr_utils_utf8_str_len_as_ucs1(const guchar* a_in_start, const guch
      */
 
     guchar* byte_ptr = NULL;
-    gint len = 0;
+    gulong len = 0;
 
     /*
      *to store the final decoded
@@ -690,7 +691,10 @@ enum CRStatus cr_utils_utf8_str_to_ucs4(const guchar* a_in, gulong* a_in_len, gu
 
     g_return_val_if_fail(status == CR_OK, status);
 
-    *a_out = g_malloc0(*a_out_len * sizeof(guint32));
+    gsize alloc_size;
+    if (!cr_safe_size_mul(*a_out_len, sizeof(guint32), &alloc_size))
+        return CR_ERROR;
+    *a_out = g_malloc0(alloc_size);
 
     status = cr_utils_utf8_to_ucs4(a_in, a_in_len, *a_out, a_out_len);
 
@@ -1074,7 +1078,10 @@ enum CRStatus cr_utils_utf8_str_to_ucs1(const guchar* a_in, gulong* a_in_len, gu
 
     g_return_val_if_fail(status == CR_OK, status);
 
-    *a_out = g_malloc0(*a_out_len * sizeof(guint32));
+    gsize alloc_size;
+    if (!cr_safe_size_mul(*a_out_len, sizeof(guint32), &alloc_size))
+        return CR_ERROR;
+    *a_out = g_malloc0(alloc_size);
 
     status = cr_utils_utf8_to_ucs1(a_in, a_in_len, *a_out, a_out_len);
     return status;

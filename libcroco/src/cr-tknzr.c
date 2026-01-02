@@ -635,9 +635,11 @@ static enum CRStatus cr_tknzr_parse_string(CRTknzr* a_this, CRString** a_str) {
         goto error;
     }
     str = cr_string_new();
-    if (str) {
-        cr_tknzr_get_parsing_location(a_this, &str->location);
+    if (!str) {
+        status = CR_OUT_OF_MEMORY_ERROR;
+        goto error;
     }
+    cr_tknzr_get_parsing_location(a_this, &str->location);
     for (;;) {
         guchar next_chars[2] = {0};
 

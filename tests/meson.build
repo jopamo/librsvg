@@ -17,6 +17,7 @@ test_programs = {
   'security-check': ['security-check.c'],
   'vulnerability-check': ['vulnerability_check.c'],
   'xss-checks': ['xss_checks.c'],
+  'api': ['api.c'],
 }
 
 if get_option('ci')
@@ -90,6 +91,61 @@ foreach name, sources : test_programs
   test(name, exe, env: test_env, timeout: 120)
 endforeach
 
+if get_option('gdk_pixbuf_loader') and get_option('dev_tools')
+  rsvg_loader_exe = executable(
+    'rsvg-loader-test-bin',
+    '../gdk-pixbuf-loader/test.c',
+    include_directories: test_includes,
+    dependencies: [
+      gdk_pixbuf_dep,
+      glib_dep,
+    ],
+    install: false,
+  )
+
+  test_loader_py = find_program('test-loader.py')
+  
+  test(
+    'loader-svg',
+    test_loader_py,
+    args: [
+      rsvg_loader_exe.full_path(),
+      loader.full_path(),
+      files('fixtures/loading/gnome-cool.svg'),
+      'gnome-cool.png'
+    ],
+    depends: [rsvg_loader_exe, loader],
+    env: test_env_common,
+  )
+
+  test(
+    'loader-svgz',
+    test_loader_py,
+    args: [
+      rsvg_loader_exe.full_path(),
+      loader.full_path(),
+      files('fixtures/loading/gnome-cool.svgz'),
+      'gnome-cool-z.png'
+    ],
+    depends: [rsvg_loader_exe, loader],
+    env: test_env_common,
+  )
+
+  test(
+    'loader-security',
+    test_loader_py,
+    args: [
+      rsvg_loader_exe.full_path(),
+      loader.full_path(),
+      files('fixtures/errors/515-too-many-elements.svgz'),
+      'too-many-elements.png'
+    ],
+    depends: [rsvg_loader_exe, loader],
+    env: test_env_common,
+    should_fail: true,
+  )
+endif
+
 if get_option('fuzzing')
   fuzz_c_args = cc.get_supported_arguments([
     '-fsanitize=fuzzer,address,undefined',
@@ -97,6 +153,8 @@ if get_option('fuzzing')
   
   fuzz_programs = {
     'fuzz-css': ['fuzz/fuzz-css.c'],
+    'fuzz-load-render': ['fuzz/fuzz-load-render.c'],
+    'fuzz-path': ['fuzz/fuzz-path.c'],
   }
   
   foreach name, sources : fuzz_programs
@@ -113,7 +171,7 @@ if get_option('fuzzing')
       sources,
       include_directories: test_includes,
       dependencies: [
-        librsvg_dep,
+        librsvg_private_dep,
       ],
       c_args: c_args,
       link_args: link_args,

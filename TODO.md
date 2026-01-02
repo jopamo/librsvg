@@ -62,14 +62,14 @@
 
 ### Static analysis
 
-* [ ] Add documented entrypoints (no new dir needed):
+* [x] Add documented entrypoints (no new dir needed):
 
-  * [ ] `doc/STATIC_ANALYSIS.md` with:
+  * [x] `doc/STATIC_ANALYSIS.md` with:
 
     * `meson setup build && meson compile -C build`
     * `ninja -C build clang-tidy` (or script)
     * `scan-build meson compile -C build`
-* [ ] Keep clang-tidy config in repo root: `.clang-tidy` with a minimal rule set
+* [x] Keep clang-tidy config in repo root: `.clang-tidy` with a minimal rule set
 * [ ] Prefer fixing over suppressing; only suppress third-party/libcroco if needed
 
 ---
@@ -116,30 +116,30 @@ You already have a strong base: `crash.c`, `render-crash.c`, `security-check.c`,
 
 ### Reftests / golden image stability (in `tests/fixtures/reftests`)
 
-* [ ] Create a simple rule for updating refs:
+* [x] Create a simple rule for updating refs:
 
-  * [ ] add `tests/README.md` section: how to regenerate `*-ref.png`
-* [ ] Add a “pixel diff tolerance” policy:
+  * [x] add `tests/README.md` section: how to regenerate `*-ref.png`
+* [x] Add a “pixel diff tolerance” policy:
 
-  * [ ] if you’re doing exact match today, keep exact
-  * [ ] if you see platform drift, add a tiny tolerance but keep it deterministic (document it)
+  * [x] if you’re doing exact match today, keep exact
+  * [x] if you see platform drift, add a tiny tolerance but keep it deterministic (document it)
 
 ### Add “API contract” tests (small but valuable)
 
-* [ ] Extend `tests/errors.c` and/or add a new `tests/api.c`:
+* [x] Extend `tests/errors.c` and/or add a new `tests/api.c`:
 
-  * [ ] verify GError domain is `RSVG_ERROR`
-  * [ ] verify NULL/TRUE/FALSE conventions match doc for each public call
-  * [ ] verify incremental loading (`rsvg_handle_write` + `close`) errors are sticky
+  * [x] verify GError domain is `RSVG_ERROR`
+  * [x] verify NULL/TRUE/FALSE conventions match doc for each public call
+  * [x] verify incremental loading (`rsvg_handle_write` + `close`) errors are sticky
 
-### Fuzz entrypoints (optional but prepare hooks)
+### Fuzz entrypoints
 
-* [ ] Add `tests/fuzz/` (new folder under `tests/`) with build-optional harnesses:
+* [x] Add `tests/fuzz/` (new folder under `tests/`) with build-optional harnesses:
 
-  * [ ] fuzz: `rsvg_handle_new_from_data` + `render_cairo` to small surface
-  * [ ] fuzz: CSS input routed into libcroco adapter (see below)
-  * [ ] fuzz: path `d` parser (if you can isolate)
-* [ ] Gate behind Meson option `-Dfuzzing=true` so distros can ignore
+  * [x] fuzz: `rsvg_handle_new_from_data` + `render_cairo` to small surface
+  * [x] fuzz: CSS input routed into libcroco adapter (see below)
+  * [x] fuzz: path `d` parser (if you can isolate)
+* [x] Gate behind Meson option `-Dfuzzing=true` so distros can ignore
 
 ---
 
@@ -165,13 +165,13 @@ This makes future replacement feasible and makes fuzzing focused.
 
   * [x] at least `-Wall -Wextra` equivalent via Meson warning_level
   * [x] add targeted flags for UB hotspots if manageable
-* [ ] Fix the highest-value warning classes first inside `libcroco/src/`:
+* [x] Fix the highest-value warning classes first inside `libcroco/src/`:
 
-  * [ ] missing prototypes / implicit declarations
-  * [ ] signed/unsigned size comparisons
-  * [ ] truncation in token/length handling
-  * [ ] unchecked multiplication for allocations
-* [ ] Add small “safe size math” helpers in libcroco (internal) and use them for allocations
+  * [x] missing prototypes / implicit declarations
+  * [x] signed/unsigned size comparisons
+  * [x] truncation in token/length handling
+  * [x] unchecked multiplication for allocations
+* [x] Add small “safe size math” helpers in libcroco (internal) and use them for allocations
 
 ### Step 3: Add parsing caps to prevent CSS DoS (enforced in adapter, not sprinkled)
 
@@ -193,7 +193,7 @@ This makes future replacement feasible and makes fuzzing focused.
 * [x] Add a fuzz harness (under `tests/fuzz/`) that feeds random CSS into the adapter
 * [x] Run it at least in nightly CI or locally, not necessarily per-PR
 
-### Step 5: Optional incremental refactor inside libcroco
+### Step 5: incremental refactor inside libcroco
 
 * [ ] Reduce global state and make error returns explicit where easy
 * [ ] Make tokenizer/parser functions accept length-bounded spans, not rely on NUL-terminated strings
@@ -207,15 +207,15 @@ This makes future replacement feasible and makes fuzzing focused.
 
 ## gdk-pixbuf-loader (in `gdk-pixbuf-loader/`)
 
-* [ ] Add a dedicated loader test job:
+* [x] Add a dedicated loader test job:
 
-  * [ ] build loader
-  * [ ] run `gdk-pixbuf-loader/test.c` (you already have `test.c`)
-  * [ ] validate it can load:
+  * [x] build loader
+  * [x] run `gdk-pixbuf-loader/test.c` (you already have `test.c`)
+  * [x] validate it can load:
 
     * `tests/fixtures/loading/gnome-cool.svg`
     * `tests/fixtures/loading/gnome-cool.svgz`
-* [ ] Add a security test ensuring loader respects the same limits as library defaults
+* [x] Add a security test ensuring loader respects the same limits as library defaults
 
 ---
 
@@ -223,18 +223,18 @@ This makes future replacement feasible and makes fuzzing focused.
 
 You already have `doc/` plus `librsvg-api-abi.md`.
 
-* [ ] Expand `tests/README.md`:
+* [x] Expand `tests/README.md`:
 
-  * [ ] how to run tests + sanitizer setups
-  * [ ] how fixtures map to test binaries (crash, errors, dimensions, styles, xss, security-check)
-  * [ ] how to regenerate ref pngs in `tests/fixtures/reftests/**`
-* [ ] Add `doc/DEVELOPING.md` or extend existing doc:
+  * [x] how to run tests + sanitizer setups
+  * [x] how fixtures map to test binaries (crash, errors, dimensions, styles, xss, security-check)
+  * [x] how to regenerate ref pngs in `tests/fixtures/reftests/**`
+* [x] Add `doc/DEVELOPING.md` or extend existing doc:
 
-  * [ ] standard build commands (debug/release/asan)
-  * [ ] how to run clang-tidy/scan-build
-  * [ ] how to update generated headers and introspection artifacts
-* [ ] Add a short “release checklist” that mentions:
+  * [x] standard build commands (debug/release/asan)
+  * [x] how to run clang-tidy/scan-build
+  * [x] how to update generated headers and introspection artifacts
+* [x] Add a short “release checklist” that mentions:
 
-  * [ ] SONAME rules
-  * [ ] updating `src/librsvg-features.h.in` version macros
-  * [ ] verifying `.pc` and installed headers
+  * [x] SONAME rules
+  * [x] updating `src/librsvg-features.h.in` version macros
+  * [x] verifying `.pc` and installed headers

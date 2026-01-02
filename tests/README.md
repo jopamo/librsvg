@@ -143,26 +143,47 @@ It is up to you to decide what to do next:
   not just on your end.
 
 
+## Sanitizers and debug setups
+
+Meson provides several test setups for easier debugging:
+
+* `asan` - Run tests with AddressSanitizer.
+* `ubsan` - Run tests with UndefinedBehaviorSanitizer.
+* `asan_ubsan` - Run tests with both ASan and UBSan.
+* `glib_debug` - Run tests with GLib memory debugging (`G_SLICE=always-malloc`, `G_DEBUG=gc-friendly`).
+
+To use a setup, run:
+
+```bash
+meson test -C builddir --setup=asan_ubsan
+```
+
+## Fixture to Binary Mapping
+
+* `fixtures/reftests/**` -> `rsvg-test`
+* `fixtures/loading/*` -> `loading`
+* `fixtures/crash/*` -> `crash`
+* `fixtures/render-crash/*` -> `render-crash`
+* `fixtures/dimensions/*` -> `dimensions`
+* `fixtures/styles/*` -> `styles`
+* `fixtures/errors/*` -> `errors` and `security-check`
+
+## Pixel diff tolerance policy
+
+Currently, `librsvg` aims for **exact pixel match** for reference tests.
+
+However, if platform-specific drift is observed (e.g. due to different versions of Pango or Cairo), a tiny, deterministic tolerance may be introduced. This should be documented on a per-test basis if needed. For now, all tests in `fixtures/reftests` must match exactly.
+
 ### Regenerating reference images
 
-Let's continue with the example above, where the test
-`/rsvg-test/reftests/svg1.1/paths-data-18-f.svg` failed.  Let's say
-you fix the bug, or determine that the output image is in fact
-correct, and just differs from the reference image due to antialiasing
-artifacts.  In this case, your next step is to regenerate the
-reference image so the test passes again.
+If you determine that a test's output is correct but needs a new reference image (e.g. due to a deliberate change in rendering), you can regenerate the reference image:
 
-If you want to regenerate the reference image
-`fixtures/reftests/foo/bar-ref.png` from the corresponding `bar.svg`, you can run
-
-```
-rsvg-convert -o fixtures/reftests/foo/bar-ref.png fixtures/reftests/foo/bar.svg
+```bash
+# If you have rsvg-convert built:
+./builddir/rsvg-convert -o tests/fixtures/reftests/foo/bar-ref.png tests/fixtures/reftests/foo/bar.svg
 ```
 
-This is just the normal rsvg-convert program doing its job; it will
-just render the SVG image and output it to the specified PNG file.
-
-You can then run `meson test -C builddir` again and ensure that the tests pass.
+Always double-check the newly generated reference image to ensure it is actually correct!
 
 
 ### Issues with the official SVG test suite

@@ -1008,6 +1008,7 @@ static gboolean rsvg_handle_write_impl(RsvgHandle* handle, const guchar* buf, gs
 
     result = xmlParseChunk(handle->priv->ctxt, (char*)buf, count, 0);
     if (result != 0) {
+        handle->priv->state = RSVG_HANDLE_STATE_CLOSED_ERROR;
         if (real_error != NULL)
             g_propagate_error(error, real_error);
         else
@@ -1018,6 +1019,7 @@ static gboolean rsvg_handle_write_impl(RsvgHandle* handle, const guchar* buf, gs
     handle->priv->error = NULL;
 
     if (real_error != NULL) {
+        handle->priv->state = RSVG_HANDLE_STATE_CLOSED_ERROR;
         g_propagate_error(error, real_error);
         return FALSE;
     }
@@ -1640,9 +1642,14 @@ gboolean rsvg_handle_close(RsvgHandle* handle, GError** error) {
     rsvg_return_val_if_fail(handle, FALSE, error);
     priv = handle->priv;
 
-    if (priv->state == RSVG_HANDLE_STATE_CLOSED_OK || priv->state == RSVG_HANDLE_STATE_CLOSED_ERROR) {
+    if (priv->state == RSVG_HANDLE_STATE_CLOSED_OK) {
         /* closing is idempotent */
         return TRUE;
+    }
+
+    if (priv->state == RSVG_HANDLE_STATE_CLOSED_ERROR) {
+        g_set_error(error, RSVG_ERROR, RSVG_ERROR_FAILED, "Handle is already closed with an error");
+        return FALSE;
     }
 
     if (priv->state == RSVG_HANDLE_STATE_READING_COMPRESSED) {

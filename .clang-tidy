@@ -1,0 +1,6 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,performance-*,portability-*,readability-uppercase-literal-suffix,readability-redundant-control-flow'
+WarningsAsErrors: ''
+HeaderFilterRegex: 'src/.*'
+FormatStyle:     none
+...

@@ -33,6 +33,8 @@ libcroco_c_args = cc.get_supported_arguments([
   '-Wnested-externs',
   '-Wpointer-arith',
   '-Wno-unused-parameter',
+  '-Wsign-compare',
+  '-Wtype-limits',
 ])
 
 libcroco_lib = static_library('croco',

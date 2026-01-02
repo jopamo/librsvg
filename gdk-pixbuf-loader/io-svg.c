@@ -50,8 +50,7 @@ G_MODULE_EXPORT void fill_info(GdkPixbufFormat* info);
 enum { ERROR_WRITING = 1, ERROR_DISPLAYING_IMAGE } RsvgLoaderErrorReasons;
 
 static void rsvg_propagate_error(GError** err, const char* reason, gint code) {
-    if (err) {
-        *err = NULL;
+    if (err && *err == NULL) {
         g_set_error(err, rsvg_error_quark(), code, "%s", reason);
     }
 }
