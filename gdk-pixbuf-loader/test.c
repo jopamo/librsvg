@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
         {"width", 'w', 0, G_OPTION_ARG_INT, &width, "width [optional; defaults to the SVG's width]", "WIDTH"},
         {"height", 'h', 0, G_OPTION_ARG_INT, &height, "height [optional; defaults to the SVG's height]", "HEIGHT"},
         {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &args, NULL, "INPUT-FILE OUTPUT-FILE"},
-        {NULL}};
+        {0}};
 
     setlocale(LC_ALL, "");
 

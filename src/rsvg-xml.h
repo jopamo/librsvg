@@ -24,10 +24,9 @@
 
 #include <libxml/xmlIO.h>
 #include <gio/gio.h>
+#include "rsvg.h"
 
 G_BEGIN_DECLS
-
-typedef struct _RsvgHandle RsvgHandle;
 
 typedef struct {
     void (*start_element)(void* ctx, const xmlChar* name, const xmlChar** atts);
