@@ -844,7 +844,7 @@ char** rsvg_css_parse_xml_attribute_string(const char* attribute_string) {
     tag = g_strdup_printf("<rsvg-hack %s />\n", attribute_string);
 
     rsvg_xml_init_default_sax_handler(&handler);
-    handler.serror = rsvg_xml_noerror;
+    handler.serror = (xmlStructuredErrorFunc)rsvg_xml_noerror;
     parser = xmlCreatePushParserCtxt(&handler, NULL, tag, strlen(tag) + 1, NULL);
     rsvg_xml_configure_parser(parser, NULL);
 
