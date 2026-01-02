@@ -37,8 +37,6 @@
 #include "rsvg-mask.h"
 #include "rsvg-marker.h"
 
-#include <libcroco.h>
-
 #define RSVG_DEFAULT_FONT "Times New Roman"
 
 static const cairo_antialias_t SHAPE_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT;
@@ -50,11 +48,6 @@ static const cairo_antialias_t TEXT_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT;
 static const cairo_antialias_t TEXT_RENDERING_OPTIMIZE_SPEED = CAIRO_ANTIALIAS_NONE;
 static const cairo_antialias_t TEXT_RENDERING_OPTIMIZE_LEGIBILITY = CAIRO_ANTIALIAS_DEFAULT;
 static const cairo_antialias_t TEXT_RENDERING_GEOMETRIC_PRECISION = CAIRO_ANTIALIAS_DEFAULT;
-
-typedef struct _StyleValueData {
-    gchar* value;
-    gboolean important;
-} StyleValueData;
 
 /*
  * _rsvg_cairo_matrix_init_shear: Set up a shearing matrix.
@@ -69,7 +62,7 @@ static void _rsvg_cairo_matrix_init_shear(cairo_matrix_t* dst, double theta) {
     cairo_matrix_init(dst, 1., 0., tan(theta * M_PI / 180.0), 1., 0., 0);
 }
 
-static StyleValueData* style_value_data_new(const gchar* value, gboolean important) {
+StyleValueData* rsvg_style_value_data_new(const gchar* value, gboolean important) {
     StyleValueData* ret;
 
     ret = g_new(StyleValueData, 1);
@@ -79,7 +72,7 @@ static StyleValueData* style_value_data_new(const gchar* value, gboolean importa
     return ret;
 }
 
-static void style_value_data_free(StyleValueData* value) {
+void rsvg_style_value_data_free(StyleValueData* value) {
     if (!value)
         return;
     g_free(value->value);
@@ -185,7 +178,7 @@ void rsvg_state_init(RsvgState* state) {
     state->text_rendering_type = TEXT_RENDERING_AUTO;
     state->has_text_rendering_type = FALSE;
 
-    state->styles = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)style_value_data_free);
+    state->styles = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)rsvg_style_value_data_free);
 }
 
 void rsvg_state_reinit(RsvgState* state) {
@@ -467,7 +460,7 @@ static void rsvg_parse_style_pair(RsvgHandle* ctx,
     if (name == NULL || value == NULL)
         return;
 
-    g_hash_table_insert(state->styles, (gpointer)g_strdup(name), (gpointer)style_value_data_new(value, important));
+    g_hash_table_insert(state->styles, (gpointer)g_strdup(name), (gpointer)rsvg_style_value_data_new(value, important));
 
     if (g_str_equal(name, "color"))
         state->current_color = rsvg_css_parse_color(value, &state->has_current_color);
@@ -1022,196 +1015,6 @@ void rsvg_parse_style(RsvgHandle* ctx, RsvgState* state, const char* str) {
         g_strfreev(values);
     }
     g_strfreev(styles);
-}
-
-static void rsvg_css_define_style(RsvgHandle* ctx,
-                                  const gchar* selector,
-                                  const gchar* style_name,
-                                  const gchar* style_value,
-                                  gboolean important) {
-    GHashTable* styles;
-    gboolean need_insert = FALSE;
-
-    /* push name/style pair into HT */
-    styles = g_hash_table_lookup(ctx->priv->css_props, selector);
-    if (styles == NULL) {
-        styles = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)style_value_data_free);
-        g_hash_table_insert(ctx->priv->css_props, (gpointer)g_strdup(selector), styles);
-        need_insert = TRUE;
-    }
-    else {
-        StyleValueData* current_value;
-        current_value = g_hash_table_lookup(styles, style_name);
-        if (current_value == NULL || !current_value->important)
-            need_insert = TRUE;
-    }
-    if (need_insert) {
-        g_hash_table_insert(styles, (gpointer)g_strdup(style_name),
-                            (gpointer)style_value_data_new(style_value, important));
-    }
-}
-
-typedef struct _CSSUserData {
-    RsvgHandle* ctx;
-    CRSelector* selector;
-} CSSUserData;
-
-static void css_user_data_init(CSSUserData* user_data, RsvgHandle* ctx) {
-    user_data->ctx = ctx;
-    user_data->selector = NULL;
-}
-
-static void ccss_start_selector(CRDocHandler* a_handler, CRSelector* a_selector_list) {
-    CSSUserData* user_data;
-
-    g_return_if_fail(a_handler);
-
-    user_data = (CSSUserData*)a_handler->app_data;
-    cr_selector_ref(a_selector_list);
-    user_data->selector = a_selector_list;
-}
-
-static void ccss_end_selector(CRDocHandler* a_handler, CRSelector* a_selector_list) {
-    CSSUserData* user_data;
-
-    g_return_if_fail(a_handler);
-
-    (void)a_selector_list;
-
-    user_data = (CSSUserData*)a_handler->app_data;
-
-    cr_selector_unref(user_data->selector);
-    user_data->selector = NULL;
-}
-
-static void ccss_property(CRDocHandler* a_handler, CRString* a_name, CRTerm* a_expr, gboolean a_important) {
-    CSSUserData* user_data;
-    gchar* name = NULL;
-    size_t len = 0;
-
-    g_return_if_fail(a_handler);
-
-    user_data = (CSSUserData*)a_handler->app_data;
-
-    if (a_name && a_expr && user_data->selector) {
-        CRSelector* cur;
-        for (cur = user_data->selector; cur; cur = cur->next) {
-            if (cur->simple_sel) {
-                gchar* selector = (gchar*)cr_simple_sel_to_string(cur->simple_sel);
-                if (selector) {
-                    gchar *style_name, *style_value;
-                    name = (gchar*)cr_string_peek_raw_str(a_name);
-                    len = cr_string_peek_raw_str_len(a_name);
-                    style_name = g_strndup(name, len);
-                    style_value = (gchar*)cr_term_to_string(a_expr);
-                    rsvg_css_define_style(user_data->ctx, selector, style_name, style_value, a_important);
-                    g_free(selector);
-                    g_free(style_name);
-                    g_free(style_value);
-                }
-            }
-        }
-    }
-}
-
-static void ccss_error(CRDocHandler* a_handler) {
-    (void)a_handler;
-    /* yup, like i care about CSS parsing errors ;-)
-       ignore, chug along */
-    g_warning(_("CSS parsing error\n"));
-}
-
-static void ccss_unrecoverable_error(CRDocHandler* a_handler) {
-    (void)a_handler;
-    /* yup, like i care about CSS parsing errors ;-)
-       ignore, chug along */
-    g_warning(_("CSS unrecoverable error\n"));
-}
-
-static void ccss_import_style(CRDocHandler* a_this,
-                              GList* a_media_list,
-                              CRString* a_uri,
-                              CRString* a_uri_default_ns,
-                              CRParsingLocation* a_location);
-
-static void init_sac_handler(CRDocHandler* a_handler) {
-    a_handler->start_document = NULL;
-    a_handler->end_document = NULL;
-    a_handler->import_style = ccss_import_style;
-    a_handler->namespace_declaration = NULL;
-    a_handler->comment = NULL;
-    a_handler->start_selector = ccss_start_selector;
-    a_handler->end_selector = ccss_end_selector;
-    a_handler->property = ccss_property;
-    a_handler->start_font_face = NULL;
-    a_handler->end_font_face = NULL;
-    a_handler->start_media = NULL;
-    a_handler->end_media = NULL;
-    a_handler->start_page = NULL;
-    a_handler->end_page = NULL;
-    a_handler->ignorable_at_rule = NULL;
-    a_handler->error = ccss_error;
-    a_handler->unrecoverable_error = ccss_unrecoverable_error;
-}
-
-void rsvg_parse_cssbuffer(RsvgHandle* ctx, const char* buff, size_t buflen) {
-    CRParser* parser = NULL;
-    CRDocHandler* css_handler = NULL;
-    CSSUserData user_data;
-
-    if (buff == NULL || buflen == 0)
-        return;
-
-    css_handler = cr_doc_handler_new();
-    init_sac_handler(css_handler);
-
-    css_user_data_init(&user_data, ctx);
-    css_handler->app_data = &user_data;
-
-    /* TODO: fix libcroco to take in const strings */
-    parser = cr_parser_new_from_buf((guchar*)buff, (gulong)buflen, CR_UTF_8, FALSE);
-    if (parser == NULL) {
-        cr_doc_handler_unref(css_handler);
-        return;
-    }
-
-    cr_parser_set_sac_handler(parser, css_handler);
-    cr_doc_handler_unref(css_handler);
-
-    cr_parser_set_use_core_grammar(parser, FALSE);
-    cr_parser_parse(parser);
-
-    cr_parser_destroy(parser);
-}
-
-static void ccss_import_style(CRDocHandler* a_this,
-                              GList* a_media_list,
-                              CRString* a_uri,
-                              CRString* a_uri_default_ns,
-                              CRParsingLocation* a_location) {
-    CSSUserData* user_data = (CSSUserData*)a_this->app_data;
-    char* stylesheet_data;
-    gsize stylesheet_data_len;
-    char* mime_type = NULL;
-
-    (void)a_media_list;
-    (void)a_uri_default_ns;
-    (void)a_location;
-
-    if (a_uri == NULL)
-        return;
-
-    stylesheet_data = _rsvg_handle_acquire_data(user_data->ctx, cr_string_peek_raw_str(a_uri), &mime_type,
-                                                &stylesheet_data_len, NULL);
-    if (stylesheet_data == NULL || mime_type == NULL || strcmp(mime_type, "text/css") != 0) {
-        g_free(stylesheet_data);
-        g_free(mime_type);
-        return;
-    }
-
-    rsvg_parse_cssbuffer(user_data->ctx, stylesheet_data, stylesheet_data_len);
-    g_free(stylesheet_data);
-    g_free(mime_type);
 }
 
 /* Parse an SVG transform string into an affine matrix. Reference: SVG

@@ -27,10 +27,19 @@ libcroco_sources = [
   'src/cr-utils.c',
 ]
 
+libcroco_c_args = cc.get_supported_arguments([
+  '-Wmissing-prototypes',
+  '-Wstrict-prototypes',
+  '-Wnested-externs',
+  '-Wpointer-arith',
+  '-Wno-unused-parameter',
+])
+
 libcroco_lib = static_library('croco',
   libcroco_sources,
   dependencies: [glib_dep, libxml_dep],
   include_directories: [include_directories('src'), config_inc],
+  c_args: libcroco_c_args,
 )
 
 croco_dep = declare_dependency(

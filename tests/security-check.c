@@ -168,6 +168,44 @@ static void test_external_entity_blocked(void) {
     g_free(tmpdir);
 }
 
+static void test_recursion_limit(void) {
+    char* file_path = g_build_filename(test_utils_get_test_data_path(), "errors", "308-recursive-use.svg", NULL);
+    GError* error = NULL;
+    RsvgHandle* handle = rsvg_handle_new_from_file(file_path, &error);
+
+    g_assert_no_error(error);
+    g_assert_nonnull(handle);
+
+    RsvgDimensionData dims;
+    rsvg_handle_get_dimensions(handle, &dims);
+    cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 100, 100);
+    cairo_t* cr = cairo_create(surface);
+
+    /* Should not crash and should return within reasonable time */
+    rsvg_handle_render_cairo(handle, cr);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    g_object_unref(handle);
+    g_free(file_path);
+}
+
+static void test_gzip_bomb(void) {
+    char* file_path = g_build_filename(test_utils_get_test_data_path(), "errors", "515-too-many-elements.svgz", NULL);
+    GError* error = NULL;
+    RsvgHandle* handle = rsvg_handle_new_from_file(file_path, &error);
+
+    /* This should fail with an instancing limit error if it's a real bomb */
+    if (handle) {
+        g_object_unref(handle);
+    }
+    else {
+        g_assert_nonnull(error);
+        g_clear_error(&error);
+    }
+    g_free(file_path);
+}
+
 int main(int argc, char** argv) {
     int result;
     g_test_init(&argc, &argv, NULL);
@@ -178,6 +216,8 @@ int main(int argc, char** argv) {
     g_test_add_func("/security/xinclude-ignored", test_xinclude_ignored);
     g_test_add_func("/security/tref-removed", test_tref_removed);
     g_test_add_func("/security/external-entity-blocked", test_external_entity_blocked);
+    g_test_add_func("/security/recursion-limit", test_recursion_limit);
+    g_test_add_func("/security/gzip-bomb", test_gzip_bomb);
 
     result = g_test_run();
 

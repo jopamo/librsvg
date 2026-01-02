@@ -125,10 +125,10 @@ static char* rsvg_acquire_file_data(const char* uri,
                                     gsize* out_len,
                                     GCancellable* cancellable,
                                     GError** error) {
-    GFile* file;
-    gchar *path, *data;
+    g_autoptr(GFile) file = NULL;
+    g_autofree gchar* path = NULL;
+    gchar* data;
     gsize len;
-    char* content_type;
 
     (void)cancellable;
 
@@ -141,23 +141,19 @@ static char* rsvg_acquire_file_data(const char* uri,
     path = g_file_get_path(file);
 
     if (path == NULL) {
-        g_object_unref(file);
         return NULL;
     }
 
     if (!g_file_get_contents(path, &data, &len, error)) {
-        g_free(path);
-        g_object_unref(file);
         return NULL;
     }
 
-    if (out_mime_type && (content_type = g_content_type_guess(path, (guchar*)data, len, NULL))) {
-        *out_mime_type = g_content_type_get_mime_type(content_type);
-        g_free(content_type);
+    if (out_mime_type) {
+        g_autofree char* content_type = g_content_type_guess(path, (guchar*)data, len, NULL);
+        if (content_type) {
+            *out_mime_type = g_content_type_get_mime_type(content_type);
+        }
     }
-
-    g_free(path);
-    g_object_unref(file);
 
     *out_len = len;
     return data;
@@ -168,47 +164,40 @@ static GInputStream* rsvg_acquire_gvfs_stream(const char* uri,
                                               char** out_mime_type,
                                               GCancellable* cancellable,
                                               GError** error) {
-    GFile *base, *file;
-    GFileInputStream* stream;
-    GError* err = NULL;
+    g_autoptr(GFile) file = g_file_new_for_uri(uri);
+    GInputStream* stream;
+    g_autoptr(GError) err = NULL;
 
-    file = g_file_new_for_uri(uri);
-
-    stream = g_file_read(file, cancellable, &err);
-    g_object_unref(file);
+    stream = G_INPUT_STREAM(g_file_read(file, cancellable, &err));
 
     if (stream == NULL && g_error_matches(err, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+        g_autoptr(GFile) base = NULL;
         g_clear_error(&err);
 
         base = g_file_new_for_uri(base_uri);
+        g_clear_object(&file);
         file = g_file_resolve_relative_path(base, uri);
-        g_object_unref(base);
 
-        stream = g_file_read(file, cancellable, &err);
-        g_object_unref(file);
+        stream = G_INPUT_STREAM(g_file_read(file, cancellable, &err));
     }
 
     if (stream == NULL) {
-        g_propagate_error(error, err);
+        g_propagate_error(error, g_steal_pointer(&err));
         return NULL;
     }
 
     if (out_mime_type) {
-        GFileInfo* file_info;
+        g_autoptr(GFileInfo) file_info = g_file_input_stream_query_info(
+            G_FILE_INPUT_STREAM(stream), G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, cancellable, NULL /* error */);
         const char* content_type;
 
-        file_info = g_file_input_stream_query_info(stream, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, cancellable,
-                                                   NULL /* error */);
         if (file_info && (content_type = g_file_info_get_content_type(file_info)))
             *out_mime_type = g_content_type_get_mime_type(content_type);
         else
             *out_mime_type = NULL;
-
-        if (file_info)
-            g_object_unref(file_info);
     }
 
-    return G_INPUT_STREAM(stream);
+    return stream;
 }
 
 static char* rsvg_acquire_gvfs_data(const char* uri,
@@ -217,39 +206,34 @@ static char* rsvg_acquire_gvfs_data(const char* uri,
                                     gsize* out_len,
                                     GCancellable* cancellable,
                                     GError** error) {
-    GFile *base, *file;
-    GError* err;
-    char* data;
+    g_autoptr(GFile) file = g_file_new_for_uri(uri);
+    g_autoptr(GError) err = NULL;
+    char* data = NULL;
     gsize len;
-    char* content_type;
     gboolean res;
 
-    file = g_file_new_for_uri(uri);
-
-    err = NULL;
-    data = NULL;
     if (!(res = g_file_load_contents(file, cancellable, &data, &len, NULL, &err)) &&
         g_error_matches(err, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) && base_uri != NULL) {
+        g_autoptr(GFile) base = NULL;
         g_clear_error(&err);
-        g_object_unref(file);
 
         base = g_file_new_for_uri(base_uri);
+        g_clear_object(&file);
         file = g_file_resolve_relative_path(base, uri);
-        g_object_unref(base);
 
         res = g_file_load_contents(file, cancellable, &data, &len, NULL, &err);
     }
 
-    g_object_unref(file);
-
     if (err) {
-        g_propagate_error(error, err);
+        g_propagate_error(error, g_steal_pointer(&err));
         return NULL;
     }
 
-    if (out_mime_type && (content_type = g_content_type_guess(uri, (guchar*)data, len, NULL))) {
-        *out_mime_type = g_content_type_get_mime_type(content_type);
-        g_free(content_type);
+    if (out_mime_type) {
+        g_autofree char* content_type = g_content_type_guess(uri, (guchar*)data, len, NULL);
+        if (content_type) {
+            *out_mime_type = g_content_type_get_mime_type(content_type);
+        }
     }
 
     *out_len = len;

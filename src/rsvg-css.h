@@ -47,6 +47,9 @@ G_BEGIN_DECLS
 #define RSVG_ASPECT_RATIO_XMAX_YMAX (1 << 8)
 #define RSVG_ASPECT_RATIO_SLICE (1u << 31)
 
+G_GNUC_INTERNAL
+void rsvg_parse_cssbuffer(RsvgHandle* ctx, const char* buff, size_t buflen);
+
 /* This one is semi-public for mis-use in rsvg-convert */
 guint32 rsvg_css_parse_color(const char* str, gboolean* inherit);
 

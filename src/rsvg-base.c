@@ -922,8 +922,8 @@ static gchar* rsvg_get_base_uri_from_filename(const gchar* filename) {
  * Since: 2.9
  */
 void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri) {
-    gchar* uri;
-    GFile* file;
+    g_autofree gchar* uri = NULL;
+    g_autoptr(GFile) file = NULL;
 
     g_return_if_fail(handle != NULL);
 
@@ -937,8 +937,6 @@ void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri) {
 
     file = g_file_new_for_uri(uri ? uri : "data:");
     rsvg_handle_set_base_gfile(handle, file);
-    g_object_unref(file);
-    g_free(uri);
 }
 
 /**
@@ -1701,10 +1699,11 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
                                       GError** error) {
     RsvgHandlePrivate* priv;
     int result;
-    GError* err = NULL;
+    g_autoptr(GError) err = NULL;
     gboolean res = FALSE;
     const guchar* buf;
     gssize num_read;
+    g_autoptr(GInputStream) buffered_stream = NULL;
 
     g_return_val_if_fail(RSVG_IS_HANDLE(handle), FALSE);
     g_return_val_if_fail(G_IS_INPUT_STREAM(stream), FALSE);
@@ -1716,42 +1715,34 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
     g_return_val_if_fail(priv->state == RSVG_HANDLE_STATE_START, FALSE);
 
     /* detect zipped streams */
-    stream = g_buffered_input_stream_new(stream);
-    num_read = g_buffered_input_stream_fill(G_BUFFERED_INPUT_STREAM(stream), 2, cancellable, error);
+    buffered_stream = g_buffered_input_stream_new(stream);
+    num_read = g_buffered_input_stream_fill(G_BUFFERED_INPUT_STREAM(buffered_stream), 2, cancellable, error);
     if (num_read < 2) {
-        g_object_unref(stream);
         priv->state = RSVG_HANDLE_STATE_CLOSED_ERROR;
-        if (num_read < 0) {
-            g_assert(error == NULL || *error != NULL);
-        }
-        else {
+        if (num_read >= 0) {
             g_set_error(error, rsvg_error_quark(), RSVG_ERROR_FAILED, _("Input file is too short"));
         }
 
         return FALSE;
     }
-    buf = g_buffered_input_stream_peek_buffer(G_BUFFERED_INPUT_STREAM(stream), NULL);
+
+    buf = g_buffered_input_stream_peek_buffer(G_BUFFERED_INPUT_STREAM(buffered_stream), NULL);
     if ((buf[0] == GZ_MAGIC_0) && (buf[1] == GZ_MAGIC_1)) {
-        GConverter* converter;
-        GInputStream* conv_stream;
-
-        converter = G_CONVERTER(g_zlib_decompressor_new(G_ZLIB_COMPRESSOR_FORMAT_GZIP));
-        conv_stream = g_converter_input_stream_new(stream, converter);
-        g_object_unref(converter);
-        g_object_unref(stream);
-
-        stream = conv_stream;
+        g_autoptr(GConverter) converter = G_CONVERTER(g_zlib_decompressor_new(G_ZLIB_COMPRESSOR_FORMAT_GZIP));
+        GInputStream* conv_stream = g_converter_input_stream_new(buffered_stream, converter);
+        g_clear_object(&buffered_stream);
+        buffered_stream = conv_stream;
     }
 
     priv->error = &err;
     priv->cancellable = cancellable ? g_object_ref(cancellable) : NULL;
 
     g_assert(handle->priv->ctxt == NULL);
-    handle->priv->ctxt = create_xml_stream_parser(handle, stream, cancellable, &err);
+    handle->priv->ctxt = create_xml_stream_parser(handle, buffered_stream, cancellable, &err);
 
     if (!handle->priv->ctxt) {
         if (err) {
-            g_propagate_error(error, err);
+            g_propagate_error(error, g_steal_pointer(&err));
         }
 
         goto out;
@@ -1760,7 +1751,7 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
     result = xmlParseDocument(priv->ctxt);
     if (result != 0) {
         if (err)
-            g_propagate_error(error, err);
+            g_propagate_error(error, g_steal_pointer(&err));
         else
             rsvg_xml_set_error(error, handle->priv->ctxt);
 
@@ -1768,7 +1759,7 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
     }
 
     if (err != NULL) {
-        g_propagate_error(error, err);
+        g_propagate_error(error, g_steal_pointer(&err));
         goto out;
     }
 
@@ -1777,8 +1768,6 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
 out:
 
     priv->ctxt = rsvg_free_xml_parser_and_doc(priv->ctxt);
-
-    g_object_unref(stream);
 
     priv->error = NULL;
     g_clear_object(&priv->cancellable);
@@ -1816,7 +1805,7 @@ RsvgHandle* rsvg_handle_new_from_gfile_sync(GFile* file,
                                             GCancellable* cancellable,
                                             GError** error) {
     RsvgHandle* handle;
-    GFileInputStream* stream;
+    g_autoptr(GFileInputStream) stream = NULL;
 
     g_return_val_if_fail(G_IS_FILE(file), NULL);
     g_return_val_if_fail(cancellable == NULL || G_IS_CANCELLABLE(cancellable), NULL);
@@ -1827,7 +1816,6 @@ RsvgHandle* rsvg_handle_new_from_gfile_sync(GFile* file,
         return NULL;
 
     handle = rsvg_handle_new_from_stream_sync(G_INPUT_STREAM(stream), file, flags, cancellable, error);
-    g_object_unref(stream);
 
     return handle;
 }

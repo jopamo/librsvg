@@ -118,6 +118,39 @@ static void test_event_handlers_ignored(void) {
     g_object_unref(handle);
 }
 
+static void test_javascript_url_variants(void) {
+    const char* variants[] = {
+        "jAVascript:alert(1)",
+        " javascript:alert(1)",
+        "javascript:alert(&quot;XSS&quot;)",
+    };
+
+    for (size_t i = 0; i < G_N_ELEMENTS(variants); i++) {
+        gchar* svg = g_strdup_printf(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">"
+            "  <image xlink:href=\"%s\" width=\"100\" height=\"100\"/>"
+            "</svg>",
+            variants[i]);
+
+        GError* error = NULL;
+        RsvgHandle* handle = rsvg_handle_new_from_data((const guint8*)svg, strlen(svg), &error);
+
+        g_assert_no_error(error);
+        g_assert_nonnull(handle);
+
+        RsvgDimensionData dims;
+        rsvg_handle_get_dimensions(handle, &dims);
+        cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 100, 100);
+        cairo_t* cr = cairo_create(surface);
+        rsvg_handle_render_cairo(handle, cr);
+
+        cairo_destroy(cr);
+        cairo_surface_destroy(surface);
+        g_object_unref(handle);
+        g_free(svg);
+    }
+}
+
 int main(int argc, char** argv) {
     g_test_init(&argc, &argv, NULL);
 
@@ -125,6 +158,7 @@ int main(int argc, char** argv) {
     g_test_add_func("/security/javascript-url-image", test_javascript_url_image);
     g_test_add_func("/security/foreign-object-ignored", test_foreign_object_ignored);
     g_test_add_func("/security/event-handlers-ignored", test_event_handlers_ignored);
+    g_test_add_func("/security/javascript-url-variants", test_javascript_url_variants);
 
     return g_test_run();
 }

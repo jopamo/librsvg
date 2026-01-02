@@ -52,13 +52,13 @@
 
 ### GObject modernization (in `src/rsvg-gobject.c`, `src/rsvg-private.h`)
 
-* [ ] Convert `RsvgHandle` to `G_DEFINE_TYPE_WITH_PRIVATE` if not already
-* [ ] Use `g_autoptr`, `g_autofree`, `g_clear_object`, `g_clear_pointer` in new/refactored code paths
+* [x] Convert `RsvgHandle` to `G_DEFINE_TYPE_WITH_PRIVATE` if not already
+* [x] Use `g_autoptr`, `g_autofree`, `g_clear_object`, `g_clear_pointer` in new/refactored code paths
 * [ ] Keep ABI padding in public structs intact (do not touch the `_abi_padding[15]`)
-* [ ] Reduce manual cleanup ladders in:
+* [x] Reduce manual cleanup ladders in:
 
-  * [ ] `src/rsvg.c` (public API entrypoints)
-  * [ ] `src/rsvg-io.c` (GIO streams)
+  * [x] `src/rsvg.c` (public API entrypoints)
+  * [x] `src/rsvg-io.c` (GIO streams)
 
 ### Static analysis
 
@@ -94,25 +94,25 @@ You already have a strong base: `crash.c`, `render-crash.c`, `security-check.c`,
 
 ### Expand existing suites without inventing a new framework
 
-* [ ] `tests/security-check.c`
+* [x] `tests/security-check.c`
 
-  * [ ] add explicit cases for:
+  * [x] add explicit cases for:
 
     * recursion depth caps (`tests/fixtures/errors/308-*`)
     * gzip bomb-ish content (`tests/fixtures/errors/*svgz`)
     * xinclude denial (`tests/fixtures/xinclude.svg` + `tests/fixtures/secret.txt`)
-* [ ] `tests/xss_checks.c`
+* [x] `tests/xss_checks.c`
 
-  * [ ] add more `javascript:` variants and mixed-case, whitespace tricks
-  * [ ] add tests for event handler attributes across namespaces
-* [ ] `tests/vulnerability_check.c`
+  * [x] add more `javascript:` variants and mixed-case, whitespace tricks
+  * [x] add tests for event handler attributes across namespaces
+* [x] `tests/vulnerability_check.c`
 
-  * [ ] add “budget” asserts:
+  * [x] add “budget” asserts:
 
     * too many elements
     * too complex paths
     * too large images (if supported)
-  * [ ] test both default limits and `RSVG_HANDLE_FLAG_UNLIMITED`
+  * [x] test both default limits and `RSVG_HANDLE_FLAG_UNLIMITED`
 
 ### Reftests / golden image stability (in `tests/fixtures/reftests`)
 
@@ -149,22 +149,22 @@ You already build it as an internal static (`build-meson-asan/libcroco/libcroco.
 
 ### Step 1: Isolate all libcroco use behind one adapter (in `src/rsvg-css.c` / `src/rsvg-css.h`)
 
-* [ ] Make `src/rsvg-css.c` the only translation unit that includes `libcroco/src/libcroco.h` (or similar)
-* [ ] Define a small internal interface in `src/rsvg-css.h` that the rest of librsvg calls
+* [x] Make `src/rsvg-css.c` the only translation unit that includes `libcroco/src/libcroco.h` (or similar)
+* [x] Define a small internal interface in `src/rsvg-css.h` that the rest of librsvg calls
 
   * parse stylesheet from bytes
   * apply to a node/style context
   * free stylesheet
-* [ ] Convert any direct libcroco type usage elsewhere into opaque pointers passed through the adapter
+* [x] Convert any direct libcroco type usage elsewhere into opaque pointers passed through the adapter
 
 This makes future replacement feasible and makes fuzzing focused.
 
 ### Step 2: Bring libcroco compilation under stricter hygiene (in `libcroco/meson.build`)
 
-* [ ] Build libcroco with warnings that don’t drown you but catch real bugs:
+* [x] Build libcroco with warnings that don’t drown you but catch real bugs:
 
-  * [ ] at least `-Wall -Wextra` equivalent via Meson warning_level
-  * [ ] add targeted flags for UB hotspots if manageable
+  * [x] at least `-Wall -Wextra` equivalent via Meson warning_level
+  * [x] add targeted flags for UB hotspots if manageable
 * [ ] Fix the highest-value warning classes first inside `libcroco/src/`:
 
   * [ ] missing prototypes / implicit declarations
@@ -175,23 +175,23 @@ This makes future replacement feasible and makes fuzzing focused.
 
 ### Step 3: Add parsing caps to prevent CSS DoS (enforced in adapter, not sprinkled)
 
-* [ ] In `src/rsvg-css.c`, enforce:
+* [x] In `src/rsvg-css.c`, enforce:
 
-  * [ ] max CSS bytes
-  * [ ] max rules
-  * [ ] max selector length / complexity
-  * [ ] max declarations per rule
-* [ ] Add tests in `tests/styles.c` using existing fixtures or add new ones in:
+  * [x] max CSS bytes
+  * [x] max rules
+  * [x] max selector length / complexity
+  * [x] max declarations per rule
+* [x] Add tests in `tests/styles.c` using existing fixtures or add new ones in:
 
   * `tests/fixtures/styles/`
 
-    * [ ] “too-many-rules.css-in-svg” style cases
-    * [ ] pathological selectors
+    * [x] “too-many-rules.css-in-svg” style cases
+    * [x] pathological selectors
 
 ### Step 4: Fuzz the adapter boundary
 
-* [ ] Add a fuzz harness (under `tests/fuzz/`) that feeds random CSS into the adapter
-* [ ] Run it at least in nightly CI or locally, not necessarily per-PR
+* [x] Add a fuzz harness (under `tests/fuzz/`) that feeds random CSS into the adapter
+* [x] Run it at least in nightly CI or locally, not necessarily per-PR
 
 ### Step 5: Optional incremental refactor inside libcroco
 

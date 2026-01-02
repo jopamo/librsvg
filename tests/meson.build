@@ -89,3 +89,35 @@ foreach name, sources : test_programs
 
   test(name, exe, env: test_env, timeout: 120)
 endforeach
+
+if get_option('fuzzing')
+  fuzz_c_args = cc.get_supported_arguments([
+    '-fsanitize=fuzzer,address,undefined',
+  ])
+  
+  fuzz_programs = {
+    'fuzz-css': ['fuzz/fuzz-css.c'],
+  }
+  
+  foreach name, sources : fuzz_programs
+    c_args = []
+    link_args = []
+    if fuzz_c_args.length() > 0
+      c_args += fuzz_c_args
+      link_args += fuzz_c_args
+      c_args += '-DRSVG_FUZZING_ENGINE'
+    endif
+
+    executable(
+      name,
+      sources,
+      include_directories: test_includes,
+      dependencies: [
+        librsvg_dep,
+      ],
+      c_args: c_args,
+      link_args: link_args,
+      install: false,
+    )
+  endforeach
+endif
