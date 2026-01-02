@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 
+#define RSVG_DISABLE_DEPRECATION_WARNINGS
 #include <rsvg.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 

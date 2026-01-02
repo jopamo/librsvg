@@ -869,7 +869,7 @@ static void rsvg_filter_blend(RsvgFilterPrimitiveBlendMode mode,
                         cr = bca + bcb - 2 * bca * bcb;
                         break;
                     case difference:
-                        cr = abs(bca - bcb);
+                        cr = fabs(bca - bcb);
                         break;
                 }
                 cr *= 255.0;
@@ -2415,7 +2415,7 @@ static gint discrete_component_transfer_func(gint C, RsvgNodeComponentTransferFu
 
     k = (C * user_data->nbTableValues) / 255;
 
-    return user_data->tableValues[CLAMP(k, 0, user_data->nbTableValues)];
+    return user_data->tableValues[CLAMP(k, 0, (gint)user_data->nbTableValues)];
 }
 
 static gint linear_component_transfer_func(gint C, RsvgNodeComponentTransferFunc* user_data) {

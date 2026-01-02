@@ -36,6 +36,7 @@
  */
 
 #include "config.h"
+#define GLIB_DISABLE_DEPRECATION_WARNINGS
 
 #include "rsvg-private.h"
 #include "rsvg-defs.h"

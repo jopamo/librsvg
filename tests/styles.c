@@ -27,12 +27,12 @@ static void assert_equal_color(guint expected, guint actual) {
     g_assert_cmphex(expected, ==, actual);
 }
 
-static void assert_equal_length(RsvgLength* expected, RsvgLength* actual) {
+static void assert_equal_length(const RsvgLength* expected, const RsvgLength* actual) {
     g_assert_cmpfloat(expected->length, ==, actual->length);
     g_assert_cmpint(expected->factor, ==, actual->factor);
 }
 
-static void assert_equal_value(FixtureData* fixture, RsvgNode* node) {
+static void assert_equal_value(const FixtureData* fixture, RsvgNode* node) {
     if (g_str_equal(fixture->target_name, "stroke"))
         assert_equal_color(fixture->expected.color, node->state->stroke->core.color->argb);
     else if (g_str_equal(fixture->target_name, "fill"))
@@ -43,7 +43,8 @@ static void assert_equal_value(FixtureData* fixture, RsvgNode* node) {
         g_assert_not_reached();
 }
 
-static void test_value(FixtureData* fixture) {
+static void test_value(const void* data) {
+    const FixtureData* fixture = (const FixtureData*)data;
     RsvgHandle* handle;
     RsvgNode* node;
     gchar* target_file;
@@ -127,7 +128,7 @@ int main(int argc, char* argv[]) {
     g_test_bug_base("https://bugzilla.gnome.org/show_bug.cgi?id=");
 
     for (i = 0; i < n_fixtures; i++)
-        g_test_add_data_func(fixtures[i].test_name, &fixtures[i], (void*)test_value);
+        g_test_add_data_func(fixtures[i].test_name, &fixtures[i], (GTestDataFunc)test_value);
 
     result = g_test_run();
 

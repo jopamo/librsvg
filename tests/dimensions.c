@@ -14,7 +14,8 @@ typedef struct _FixtureData {
     gint height;
 } FixtureData;
 
-static void test_dimensions(FixtureData* fixture) {
+static void test_dimensions(const void* data) {
+    const FixtureData* fixture = (const FixtureData*)data;
     RsvgHandle* handle;
     RsvgDimensionData dimension;
     gchar* target_file;
@@ -59,7 +60,7 @@ int main(int argc, char* argv[]) {
     g_test_init(&argc, &argv, NULL);
 
     for (i = 0; i < n_fixtures; i++)
-        g_test_add_data_func(fixtures[i].test_name, &fixtures[i], (void*)test_dimensions);
+        g_test_add_data_func(fixtures[i].test_name, &fixtures[i], (GTestDataFunc)test_dimensions);
 
     result = g_test_run();
 

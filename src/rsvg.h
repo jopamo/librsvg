@@ -33,7 +33,9 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-G_BEGIN_DECLS
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #if defined(RSVG_DISABLE_DEPRECATION_WARNINGS) || !GLIB_CHECK_VERSION(2, 31, 0)
 #define RSVG_DEPRECATED
@@ -193,7 +195,9 @@ void rsvg_handle_internal_set_testing(RsvgHandle* handle, gboolean testing);
 
 #include "rsvg-deprecated.h"
 
-G_END_DECLS
+#ifdef __cplusplus
+}
+#endif
 
 #include "librsvg-enum-types.h"
 #include "librsvg-features.h"

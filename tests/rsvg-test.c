@@ -72,8 +72,6 @@ static void compare_buffers(unsigned char* buf_a,
     result->pixels_changed = 0;
     result->max_diff = 0;
 
-    int stride_pixels = stride / sizeof(guint32);
-
     for (y = 0; y < height; y++) {
         row_a = (guint32*)(buf_a + y * stride);
         row_b = (guint32*)(buf_b + y * stride);
@@ -84,7 +82,6 @@ static void compare_buffers(unsigned char* buf_a,
             guint32 val_b = row_b[x];
 
             if (val_a != val_b) {
-                int channels[4];  // B, G, R, A
                 int max_local_diff = 0;
                 guint32 diff_pixel = 0;
 
@@ -97,8 +94,8 @@ static void compare_buffers(unsigned char* buf_a,
                     if (d > max_local_diff)
                         max_local_diff = d;
 
-                    if (d > result->max_diff)
-                        result->max_diff = d;
+                    if ((unsigned int)d > result->max_diff)
+                        result->max_diff = (unsigned int)d;
 
                     /* Emphasize difference for visualization */
                     int vis_d = d * 4;
@@ -326,7 +323,7 @@ int main(int argc, char** argv) {
     /* Setup tests */
     if (argc < 2) {
         /* Run all tests in fixtures/reftests */
-        char* data_path = test_utils_get_test_data_path();
+        const char* data_path = test_utils_get_test_data_path();
         GFile* base = g_file_new_for_path(data_path);
         GFile* reftests = g_file_get_child(base, "reftests");
 

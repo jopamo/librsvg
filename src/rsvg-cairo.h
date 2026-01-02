@@ -32,11 +32,15 @@
 
 #include <cairo.h>
 
-G_BEGIN_DECLS
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 gboolean rsvg_handle_render_cairo(RsvgHandle* handle, cairo_t* cr);
 gboolean rsvg_handle_render_cairo_sub(RsvgHandle* handle, cairo_t* cr, const char* id);
 
-G_END_DECLS
+#ifdef __cplusplus
+}
+#endif
 
 #endif

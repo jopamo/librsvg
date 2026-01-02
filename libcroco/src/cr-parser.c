@@ -2219,7 +2219,7 @@ parse_charset:
                     PRIVATE(a_this)->sac_handler->import_style(PRIVATE(a_this)->sac_handler, media_list, import_string,
                                                                NULL, &location);
 
-                    if ((PRIVATE(a_this)->sac_handler->resolve_import == TRUE)) {
+                    if (PRIVATE(a_this)->sac_handler->resolve_import == TRUE) {
                         /*
                          *TODO: resolve the
                          *import rule.

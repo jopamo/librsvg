@@ -65,7 +65,7 @@ static TestData tests[] = {
 
 int main(int argc, char** argv) {
     int result;
-    int i;
+    size_t i;
 
     RSVG_G_TYPE_INIT;
     g_test_init(&argc, &argv, NULL);

@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         g_object_unref(crash);
     }
     else {
-        guint i;
+        int i;
 
         for (i = 1; i < argc; i++) {
             GFile* file = g_file_new_for_commandline_arg(argv[i]);

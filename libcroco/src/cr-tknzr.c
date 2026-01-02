@@ -1148,7 +1148,7 @@ static enum CRStatus cr_tknzr_parse_rgb(CRTknzr* a_this, CRRgb** a_rgb) {
     status = cr_tknzr_parse_num(a_this, &num);
     ENSURE_PARSING_COND((status == CR_OK) && (num != NULL));
 
-    if (num->val > G_MAXLONG) {
+    if (num->val > (gdouble)G_MAXLONG) {
         status = CR_PARSING_ERROR;
         goto error;
     }
@@ -1172,7 +1172,7 @@ static enum CRStatus cr_tknzr_parse_rgb(CRTknzr* a_this, CRRgb** a_rgb) {
         status = cr_tknzr_parse_num(a_this, &num);
         ENSURE_PARSING_COND((status == CR_OK) && (num != NULL));
 
-        if (num->val > G_MAXLONG) {
+        if (num->val > (gdouble)G_MAXLONG) {
             status = CR_PARSING_ERROR;
             goto error;
         }
