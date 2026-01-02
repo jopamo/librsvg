@@ -140,7 +140,7 @@ lib_c_args = [
   '-DSRCDIR="@0@"'.format(meson.project_source_root()),
 ]
 
-librsvg_lib = both_libraries(
+librsvg_lib = library(
   'rsvg-' + api_major,
   sources: lib_sources + [enum_source, enum_header],
   c_args: lib_c_args,
@@ -153,14 +153,7 @@ librsvg_lib = both_libraries(
 )
 
 librsvg_dep = declare_dependency(
-  link_with: librsvg_lib.get_static_lib(),
-  include_directories: lib_includes,
-  dependencies: lib_deps,
-  sources: [enum_header, features_header],
-)
-
-librsvg_shared_dep = declare_dependency(
-  link_with: librsvg_lib.get_shared_lib(),
+  link_with: librsvg_lib,
   include_directories: lib_includes,
   dependencies: lib_deps,
   sources: [enum_header, features_header],

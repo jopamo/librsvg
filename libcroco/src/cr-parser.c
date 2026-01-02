@@ -2736,7 +2736,6 @@ enum CRStatus cr_parser_parse_expr(CRParser* a_this, CRTerm** a_expr) {
     CRInputPos init_pos;
     CRTerm *expr = NULL, *expr2 = NULL;
     guchar next_byte = 0;
-    gulong nb_terms = 0;
 
     g_return_val_if_fail(a_this && PRIVATE(a_this) && a_expr, CR_BAD_PARAM_ERROR);
 
@@ -2752,12 +2751,6 @@ enum CRStatus cr_parser_parse_expr(CRParser* a_this, CRTerm** a_expr) {
         status = cr_tknzr_peek_byte(PRIVATE(a_this)->tknzr, 1, &next_byte);
         if (status != CR_OK) {
             if (status == CR_END_OF_INPUT_ERROR) {
-                /*
-                   if (!nb_terms)
-                   {
-                   goto error ;
-                   }
-                 */
                 status = CR_OK;
                 break;
             }
@@ -2793,7 +2786,6 @@ enum CRStatus cr_parser_parse_expr(CRParser* a_this, CRTerm** a_expr) {
         expr = cr_term_append_term(expr, expr2);
         expr2 = NULL;
         operator = 0;
-        nb_terms++;
     }
 
     if (status == CR_OK) {
