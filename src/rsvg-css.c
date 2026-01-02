@@ -821,7 +821,7 @@ gboolean rsvg_css_parse_overflow(const char* str, gboolean* inherit) {
     return 0;
 }
 
-static void rsvg_xml_noerror(void* data, xmlError* error) {}
+static void rsvg_xml_noerror(void* data, const xmlError* error) {}
 
 /* This is quite hacky and not entirely correct, but apparently
  * libxml2 has NO support for parsing pseudo attributes as defined
