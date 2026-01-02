@@ -942,7 +942,6 @@ cleanup:
     if (parser) {
         cr_parser_destroy(parser);
         parser = NULL;
-        sac_handler = NULL;
     }
     if (sac_handler) {
         cr_doc_handler_unref(sac_handler);
@@ -1075,7 +1074,6 @@ cleanup:
     if (parser) {
         cr_parser_destroy(parser);
         parser = NULL;
-        sac_handler = NULL;
     }
     if (sac_handler) {
         cr_doc_handler_unref(sac_handler);
@@ -1361,7 +1359,6 @@ cleanup:
     if (parser) {
         cr_parser_destroy(parser);
         parser = NULL;
-        sac_handler = NULL;
     }
     if (sac_handler) {
         cr_doc_handler_unref(sac_handler);
@@ -1561,7 +1558,6 @@ cleanup:
     if (parser) {
         cr_parser_destroy(parser);
         parser = NULL;
-        sac_handler = NULL;
     }
     if (sac_handler) {
         cr_doc_handler_unref(sac_handler);

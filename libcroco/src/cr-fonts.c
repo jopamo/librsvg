@@ -272,26 +272,19 @@ CRFontFamily* cr_font_family_prepend(CRFontFamily* a_this, CRFontFamily* a_famil
  * Returns CR_OK upon sucessful completion, an error code otherwise.
  */
 enum CRStatus cr_font_family_destroy(CRFontFamily* a_this) {
-    CRFontFamily* cur_ff = NULL;
+    CRFontFamily* tmp = NULL;
 
     g_return_val_if_fail(a_this, CR_BAD_PARAM_ERROR);
 
-    for (cur_ff = a_this; cur_ff && cur_ff->next; cur_ff = cur_ff->next)
-        ;
-
-    for (; cur_ff; cur_ff = cur_ff->prev) {
+    while (a_this) {
+        tmp = a_this->next;
         if (a_this->name) {
             g_free(a_this->name);
             a_this->name = NULL;
         }
 
-        if (cur_ff->next) {
-            g_free(cur_ff->next);
-        }
-
-        if (cur_ff->prev == NULL) {
-            g_free(a_this);
-        }
+        g_free(a_this);
+        a_this = tmp;
     }
 
     return CR_OK;
