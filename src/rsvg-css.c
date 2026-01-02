@@ -28,6 +28,7 @@
 #include "rsvg-css.h"
 #include "rsvg-private.h"
 #include "rsvg-styles.h"
+#include "rsvg-xml.h"
 
 #include <glib.h>
 #include <stdio.h>
@@ -842,11 +843,10 @@ char** rsvg_css_parse_xml_attribute_string(const char* attribute_string) {
 
     tag = g_strdup_printf("<rsvg-hack %s />\n", attribute_string);
 
-    memset(&handler, 0, sizeof(handler));
-    xmlSAX2InitDefaultSAXHandler(&handler, 0);
+    rsvg_xml_init_default_sax_handler(&handler);
     handler.serror = rsvg_xml_noerror;
     parser = xmlCreatePushParserCtxt(&handler, NULL, tag, strlen(tag) + 1, NULL);
-    parser->options |= XML_PARSE_NONET;
+    rsvg_xml_configure_parser(parser, NULL);
 
     if (xmlParseDocument(parser) != 0)
         goto done;

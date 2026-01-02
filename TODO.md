@@ -22,8 +22,8 @@
 * [ ] In root `meson.build`, add build targets/helpers:
 
   * [x] `ninja -C build test-asan` style alias via `meson.add_test_setup()` named setups: `asan`, `ubsan`, `asan_ubsan`
-  * [ ] `clang-tidy` convenience target that requires `compile_commands.json`
-  * [ ] `scan-build` convenience target (or documented script in `tests/`)
+  * [x] `clang-tidy` convenience target that requires `compile_commands.json`
+  * [x] `scan-build` convenience target (or documented script in `tests/`)
   
 ### Artifact sanity in CI
 
@@ -38,17 +38,17 @@
 
 ### libxml2 SAX warning cleanup (in `src/rsvg-xml.c`, `src/rsvg-xml.h`)
 
-* [ ] Replace deprecated SAX usage that triggers warnings on new libxml2
+* [x] Replace deprecated SAX usage that triggers warnings on new libxml2
 
-  * [ ] wrap libxml2 setup in a small internal module so only `rsvg-xml.c` touches libxml2 quirks
+  * [x] wrap libxml2 setup in a small internal module so only `rsvg-xml.c` touches libxml2 quirks
   * [x] fix `xmlStructuredErrorFunc` signature mismatch in `src/rsvg-css.c` for libxml2 >= 2.16
-* [ ] Make parse policy explicit and testable:
+* [x] Make parse policy explicit and testable:
 
-  * [ ] disable external entity resolution and network access
+  * [x] disable external entity resolution and network access
   * [x] ensure no XInclude processing for untrusted inputs (you have `tests/fixtures/xinclude.svg` and `secret.txt` already)
-* [ ] Add “error path determinism”:
+* [x] Add “error path determinism”:
 
-  * [ ] consistent `GError` domain/message for parse failures so tests don’t flap
+  * [x] consistent `GError` domain/message for parse failures so tests don’t flap
 
 ### GObject modernization (in `src/rsvg-gobject.c`, `src/rsvg-private.h`)
 

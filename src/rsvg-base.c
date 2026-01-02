@@ -69,9 +69,6 @@ double rsvg_internal_dpi_x = RSVG_DEFAULT_DPI_X;
 G_GNUC_INTERNAL
 double rsvg_internal_dpi_y = RSVG_DEFAULT_DPI_Y;
 
-static xmlSAXHandler rsvgSAXHandlerStruct;
-static gboolean rsvgSAXHandlerStructInited = FALSE;
-
 typedef struct _RsvgSaxHandlerDefs {
     RsvgSaxHandler super;
     RsvgHandle* ctx;
@@ -505,28 +502,11 @@ static void rsvg_xinclude_handler_end(RsvgSaxHandler* self, const char* name) {
     }
 }
 
-static void rsvg_set_xml_parse_options(xmlParserCtxtPtr xml_parser, RsvgHandle* ctx) {
-    int options;
-
-    options = (XML_PARSE_NONET | XML_PARSE_BIG_LINES);
-
-    if (ctx->priv->flags & RSVG_HANDLE_FLAG_UNLIMITED) {
-        options |= XML_PARSE_HUGE;
-    }
-
-    options |= XML_PARSE_NOENT;
-#ifdef XML_PARSE_NO_XXE
-    options |= XML_PARSE_NO_XXE;
-#endif
-
-    xmlCtxtUseOptions(xml_parser, options);
-}
-
 static xmlParserCtxtPtr create_xml_push_parser(RsvgHandle* handle, const char* base_uri) {
     xmlParserCtxtPtr parser;
 
-    parser = xmlCreatePushParserCtxt(&rsvgSAXHandlerStruct, handle, NULL, 0, base_uri);
-    rsvg_set_xml_parse_options(parser, handle);
+    parser = xmlCreatePushParserCtxt(rsvg_xml_get_sax_handler(), handle, NULL, 0, base_uri);
+    rsvg_xml_configure_parser(parser, handle);
 
     return parser;
 }
@@ -537,9 +517,9 @@ static xmlParserCtxtPtr create_xml_stream_parser(RsvgHandle* handle,
                                                  GError** error) {
     xmlParserCtxtPtr parser;
 
-    parser = rsvg_create_xml_parser_from_stream(&rsvgSAXHandlerStruct, handle, stream, cancellable, error);
+    parser = rsvg_create_xml_parser_from_stream(rsvg_xml_get_sax_handler(), handle, stream, cancellable, error);
     if (parser) {
-        rsvg_set_xml_parse_options(parser, handle);
+        rsvg_xml_configure_parser(parser, handle);
     }
 
     return parser;
@@ -739,11 +719,31 @@ static void rsvg_characters(void* data, const xmlChar* ch, int len) {
     rsvg_characters_impl(ctx, ch, len);
 }
 
+static gboolean rsvg_entity_is_external(xmlEntityPtr entity) {
+    if (!entity)
+        return FALSE;
+
+    return entity->etype == XML_EXTERNAL_GENERAL_PARSED_ENTITY ||
+           entity->etype == XML_EXTERNAL_GENERAL_UNPARSED_ENTITY || entity->etype == XML_EXTERNAL_PARAMETER_ENTITY;
+}
+
+static void rsvg_set_external_entity_error(RsvgHandle* ctx) {
+    if (ctx->priv->error && *(ctx->priv->error) == NULL) {
+        g_set_error(ctx->priv->error, RSVG_ERROR, RSVG_ERROR_FAILED, "External entities are not allowed");
+    }
+}
+
 static xmlEntityPtr rsvg_get_entity(void* data, const xmlChar* name) {
     RsvgHandle* ctx = (RsvgHandle*)data;
     xmlEntityPtr entity;
 
     entity = g_hash_table_lookup(ctx->priv->entities, name);
+
+    if (rsvg_entity_is_external(entity)) {
+        rsvg_set_external_entity_error(ctx);
+        xmlStopParser(ctx->priv->ctxt);
+        return NULL;
+    }
 
     return entity;
 }
@@ -763,23 +763,6 @@ static void rsvg_entity_decl(void* data,
         resolvedSystemId = xmlBuildRelativeURI(systemId, (xmlChar*)rsvg_handle_get_base_uri(ctx));
     else if (publicId)
         resolvedPublicId = xmlBuildRelativeURI(publicId, (xmlChar*)rsvg_handle_get_base_uri(ctx));
-
-    if (type == XML_EXTERNAL_PARAMETER_ENTITY && !content) {
-        char* entity_data;
-        gsize entity_data_len;
-
-        if (systemId)
-            entity_data = _rsvg_handle_acquire_data(ctx, (const char*)systemId, NULL, &entity_data_len, NULL);
-        else if (publicId)
-            entity_data = _rsvg_handle_acquire_data(ctx, (const char*)publicId, NULL, &entity_data_len, NULL);
-        else
-            entity_data = NULL;
-
-        if (entity_data) {
-            content = xmlCharStrndup(entity_data, entity_data_len);
-            g_free(entity_data);
-        }
-    }
 
     entity = xmlNewEntity(NULL, name, type, resolvedPublicId, resolvedSystemId, content);
 
@@ -803,6 +786,12 @@ static xmlEntityPtr rsvg_get_parameter_entity(void* data, const xmlChar* name) {
     xmlEntityPtr entity;
 
     entity = g_hash_table_lookup(ctx->priv->entities, name);
+
+    if (rsvg_entity_is_external(entity)) {
+        rsvg_set_external_entity_error(ctx);
+        xmlStopParser(ctx->priv->ctxt);
+        return NULL;
+    }
 
     return entity;
 }
@@ -862,23 +851,21 @@ static void rsvg_processing_instruction(void* ctx, const xmlChar* target, const 
     }
 }
 
-void rsvg_SAX_handler_struct_init(void) {
-    if (!rsvgSAXHandlerStructInited) {
-        rsvgSAXHandlerStructInited = TRUE;
+const RsvgSaxCallbacks* rsvg_get_sax_callbacks(void) {
+    static const RsvgSaxCallbacks callbacks = {
+        .start_element = rsvg_start_element,
+        .end_element = rsvg_end_element,
+        .characters = rsvg_characters,
+        .processing_instruction = rsvg_processing_instruction,
+        .get_entity = rsvg_get_entity,
+        .entity_decl = rsvg_entity_decl,
+        .unparsed_entity_decl = rsvg_unparsed_entity_decl,
+        .get_parameter_entity = rsvg_get_parameter_entity,
+        .error = rsvg_error_cb,
+        .cdata_block = rsvg_characters,
+    };
 
-        memset(&rsvgSAXHandlerStruct, 0, sizeof(rsvgSAXHandlerStruct));
-
-        rsvgSAXHandlerStruct.getEntity = rsvg_get_entity;
-        rsvgSAXHandlerStruct.entityDecl = rsvg_entity_decl;
-        rsvgSAXHandlerStruct.unparsedEntityDecl = rsvg_unparsed_entity_decl;
-        rsvgSAXHandlerStruct.getParameterEntity = rsvg_get_parameter_entity;
-        rsvgSAXHandlerStruct.characters = rsvg_characters;
-        rsvgSAXHandlerStruct.error = rsvg_error_cb;
-        rsvgSAXHandlerStruct.cdataBlock = rsvg_characters;
-        rsvgSAXHandlerStruct.startElement = rsvg_start_element;
-        rsvgSAXHandlerStruct.endElement = rsvg_end_element;
-        rsvgSAXHandlerStruct.processingInstruction = rsvg_processing_instruction;
-    }
+    return &callbacks;
 }
 
 /* http://www.ietf.org/rfc/rfc2396.txt */
@@ -1009,20 +996,6 @@ GQuark rsvg_error_quark(void) {
     return g_quark_from_string("rsvg-error-quark");
 }
 
-static void rsvg_set_error(GError** error, xmlParserCtxtPtr ctxt) {
-    const xmlError* xerr;
-
-    xerr = xmlCtxtGetLastError(ctxt);
-    if (xerr) {
-        g_set_error(error, rsvg_error_quark(), 0, _("Error domain %d code %d on line %d column %d of %s: %s"),
-                    xerr->domain, xerr->code, xerr->line, xerr->int2, xerr->file ? xerr->file : "data",
-                    xerr->message ? xerr->message : "-");
-    }
-    else {
-        g_set_error(error, rsvg_error_quark(), 0, _("Error parsing XML data"));
-    }
-}
-
 static gboolean rsvg_handle_write_impl(RsvgHandle* handle, const guchar* buf, gsize count, GError** error) {
     GError* real_error = NULL;
     int result;
@@ -1037,7 +1010,10 @@ static gboolean rsvg_handle_write_impl(RsvgHandle* handle, const guchar* buf, gs
 
     result = xmlParseChunk(handle->priv->ctxt, (char*)buf, count, 0);
     if (result != 0) {
-        rsvg_set_error(error, handle->priv->ctxt);
+        if (real_error != NULL)
+            g_propagate_error(error, real_error);
+        else
+            rsvg_xml_set_error(error, handle->priv->ctxt);
         return FALSE;
     }
 
@@ -1061,7 +1037,10 @@ static gboolean rsvg_handle_close_impl(RsvgHandle* handle, GError** error) {
 
         result = xmlParseChunk(handle->priv->ctxt, "", 0, TRUE);
         if (result != 0) {
-            rsvg_set_error(error, handle->priv->ctxt);
+            if (real_error != NULL)
+                g_propagate_error(error, real_error);
+            else
+                rsvg_xml_set_error(error, handle->priv->ctxt);
             handle->priv->ctxt = rsvg_free_xml_parser_and_doc(handle->priv->ctxt);
             return FALSE;
         }
@@ -1783,7 +1762,7 @@ gboolean rsvg_handle_read_stream_sync(RsvgHandle* handle,
         if (err)
             g_propagate_error(error, err);
         else
-            rsvg_set_error(error, handle->priv->ctxt);
+            rsvg_xml_set_error(error, handle->priv->ctxt);
 
         goto out;
     }

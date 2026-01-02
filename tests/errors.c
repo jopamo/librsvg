@@ -50,6 +50,22 @@ static void test_loading_error(gconstpointer data) {
     g_error_free(error);
 }
 
+static void test_invalid_xml_error_message(void) {
+    char* filename = get_test_filename("invalid-xml.svg");
+    RsvgHandle* handle;
+    GError* error = NULL;
+
+    handle = rsvg_handle_new_from_file(filename, &error);
+    g_free(filename);
+
+    g_assert_null(handle);
+    g_assert_nonnull(error);
+    g_assert(g_error_matches(error, RSVG_ERROR, RSVG_ERROR_FAILED));
+    g_assert_cmpstr(error->message, ==, "Error parsing XML data");
+
+    g_error_free(error);
+}
+
 static void test_instancing_limit(gconstpointer data) {
     const char* basename = data;
     char* filename = get_test_filename(basename);
@@ -91,6 +107,8 @@ int main(int argc, char** argv) {
 
     g_test_add_data_func_full("/errors/515-too-many-elements.svgz", "515-too-many-elements.svgz", test_loading_error,
                               NULL);
+
+    g_test_add_func("/errors/invalid-xml/message", test_invalid_xml_error_message);
 
     return g_test_run();
 }

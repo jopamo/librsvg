@@ -152,11 +152,13 @@ static void test_external_entity_blocked(void) {
     g_assert_no_error(error);
 
     handle = rsvg_handle_new_from_file(svg_path, &error);
-    g_assert_no_error(error);
-    g_assert_nonnull(handle);
+    g_assert_null(handle);
+    g_assert_nonnull(error);
+    g_assert(g_error_matches(error, RSVG_ERROR, RSVG_ERROR_FAILED));
+    g_assert_cmpstr(error->message, ==, "External entities are not allowed");
 
     g_chmod(secret_path, 0600);
-    g_object_unref(handle);
+    g_error_free(error);
     g_remove(svg_path);
     g_remove(secret_path);
     g_rmdir(tmpdir);

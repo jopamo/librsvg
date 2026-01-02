@@ -21,6 +21,12 @@ def has_target(targets, name):
     return any(target.get("name") == name for target in targets)
 
 
+def require_compile_commands(build_root):
+    compile_commands = os.path.join(build_root, "compile_commands.json")
+    if not os.path.exists(compile_commands):
+        fail("Missing compile_commands.json at: " + compile_commands)
+
+
 def main():
     build_dir = os.environ.get("G_TEST_BUILDDIR")
     if not build_dir:
@@ -35,6 +41,8 @@ def main():
         fail("Expected clang-tidy target to be present")
     if not expect_clang_tidy and has_target(targets, "clang-tidy"):
         fail("clang-tidy target present without expected tool")
+    if expect_clang_tidy:
+        require_compile_commands(build_root)
 
     if expect_scan_build and not has_target(targets, "scan-build-analysis"):
         fail("Expected scan-build-analysis target to be present")
