@@ -60,8 +60,7 @@ GType rsvg_handle_get_type(void);
  *
  * An enumeration representing possible errors
  */
-typedef enum /*< enum >*/
-{ RSVG_ERROR_FAILED } RsvgError;
+typedef enum /*< enum >*/ { RSVG_ERROR_FAILED } RsvgError;
 
 #define RSVG_ERROR (rsvg_error_quark())
 GQuark rsvg_error_quark(void) G_GNUC_CONST;
@@ -163,10 +162,11 @@ gboolean rsvg_handle_has_sub(RsvgHandle* handle, const char* id);
  *  resulting PDF file smaller and faster.
  *  Since: 2.40.3
  */
-typedef enum /*< flags >*/
-{ RSVG_HANDLE_FLAGS_NONE = 0,
-  RSVG_HANDLE_FLAG_UNLIMITED = 1 << 0,
-  RSVG_HANDLE_FLAG_KEEP_IMAGE_DATA = 1 << 1 } RsvgHandleFlags;
+typedef enum /*< flags, prefix=RSVG_HANDLE_FLAG >*/ {
+    RSVG_HANDLE_FLAGS_NONE = 0, /*< skip >*/
+    RSVG_HANDLE_FLAG_UNLIMITED = 1 << 0,
+    RSVG_HANDLE_FLAG_KEEP_IMAGE_DATA = 1 << 1
+} RsvgHandleFlags;
 
 RsvgHandle* rsvg_handle_new_with_flags(RsvgHandleFlags flags);
 

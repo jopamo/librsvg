@@ -18,55 +18,61 @@ features_header = configure_file(
   install_dir: incdir,
 )
 
+
 enum_headers = [
   'rsvg.h',
-  'rsvg-cairo.h',
 ]
 
-enum_header = custom_target(
+enum_header = gnome.mkenums(
   'librsvg-enum-types.h',
-  input: enum_headers,
-  output: 'librsvg-enum-types.h',
-  capture: true,
-  command: [
-    glib_mkenums,
-    '--identifier-prefix', 'Rsvg',
-    '--symbol-prefix', 'rsvg',
-    '--fhead',
-    '#if !defined (__RSVG_RSVG_H_INSIDE__) && !defined (RSVG_COMPILATION)\n#warning "Including <librsvg/librsvg-enum-types.h> directly is deprecated."\n#endif\n\n#ifndef __LIBRSVG_ENUM_TYPES_H__\n#define __LIBRSVG_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n',
-    '--fprod',
-    '/* enumerations from "@filename@" */\n',
-    '--vhead',
-    'GType @enum_name@_get_type (void);\n#define RSVG_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n',
-    '--ftail',
-    'G_END_DECLS\n\n#endif /* __LIBRSVG_ENUM_TYPES_H__ */',
-    '@INPUT@',
-  ],
-  install: true,
+  sources: enum_headers,
+  identifier_prefix: 'Rsvg',
+  symbol_prefix: 'rsvg',
+  fhead: '''#if !defined (__RSVG_RSVG_H_INSIDE__) && !defined (RSVG_COMPILATION)
+#warning "Including <librsvg/librsvg-enum-types.h> directly is deprecated."
+#endif
+
+#ifndef __LIBRSVG_ENUM_TYPES_H__
+#define __LIBRSVG_ENUM_TYPES_H__
+
+#include <glib-object.h>
+
+G_BEGIN_DECLS
+''',
+  fprod: '/* enumerations from "@filename@" */',
+  vhead: '''GType @enum_name@_get_type (void);
+#define RSVG_TYPE_@ENUMSHORT@ (@enum_name@_get_type())
+''',
+  ftail: '''G_END_DECLS
+
+#endif /* __LIBRSVG_ENUM_TYPES_H__ */
+''',
+  install_header: true,
   install_dir: incdir,
 )
 
-enum_source = custom_target(
+enum_source = gnome.mkenums(
   'librsvg-enum-types.c',
-  input: enum_headers,
-  output: 'librsvg-enum-types.c',
-  capture: true,
-  command: [
-    glib_mkenums,
-    '--identifier-prefix', 'Rsvg',
-    '--symbol-prefix', 'rsvg',
-    '--fhead',
-    '#include "rsvg.h"',
-    '--fprod',
-    '\n/* enumerations from "@filename@" */',
-    '--vhead',
-    'GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {',
-    '--vprod',
-    '      { @VALUENAME@, "@VALUENAME@", "@valuenick@" },',
-    '--vtail',
-    '      { 0, NULL, NULL }\n    };\n    etype = g_@type@_register_static ("@EnumName@", values);\n  }\n  return etype;\n}\n',
-    '@INPUT@',
-  ],
+  sources: enum_headers,
+  identifier_prefix: 'Rsvg',
+  symbol_prefix: 'rsvg',
+  fhead: '#include "rsvg.h"',
+  fprod: '''
+/* enumerations from "@filename@" */''',
+  vhead: '''GType
+@enum_name@_get_type (void)
+{
+  static GType etype = 0;
+  if (etype == 0) {
+    static const G@Type@Value values[] = {''',
+  vprod: '      { @VALUENAME@, "@VALUENAME@", "@valuenick@" },',
+  vtail: '''      { 0, NULL, NULL }
+    };
+    etype = g_@type@_register_static ("@EnumName@", values);
+  }
+  return etype;
+}
+''',
 )
 
 public_headers = [

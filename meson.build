@@ -16,6 +16,12 @@ gnome = import('gnome')
 pkgconfig = import('pkgconfig')
 
 cc = meson.get_compiler('c')
+if cc.has_argument('-Wno-c23-extensions')
+  add_project_arguments('-Wno-c23-extensions', language: 'c')
+endif
+if cc.has_argument('-Wno-#warnings')
+  add_project_arguments('-Wno-#warnings', language: 'c')
+endif
 m_dep = cc.find_library('m', required: false)
 
 glib_dep = dependency('glib-2.0', version: '>=2.12.0')
