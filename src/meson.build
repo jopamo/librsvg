@@ -78,6 +78,7 @@ enum_source = gnome.mkenums(
 public_headers = [
   'rsvg.h',
   'rsvg-cairo.h',
+  'rsvg-deprecated.h',
 ]
 
 install_headers(public_headers, subdir: 'librsvg-2.0/librsvg')
