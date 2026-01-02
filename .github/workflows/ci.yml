@@ -256,3 +256,53 @@ jobs:
         run: meson compile -C build-pixbuf-${{ matrix.enabled }}
       - name: Test
         run: meson test -C build-pixbuf-${{ matrix.enabled }} --print-errorlogs
+
+  installed-headers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        run: meson setup build-installed-headers -Dci=true
+      - name: Build
+        run: meson compile -C build-installed-headers
+      - name: Install to DESTDIR
+        run: meson install -C build-installed-headers --destdir install-root
+      - name: Compile installed headers
+        run: |
+          cat <<'EOF' > build-installed-headers/header-check.c
+          #include <librsvg/rsvg.h>
+          int main(void) {
+              return 0;
+          }
+          EOF
+          PKG_CONFIG_SYSROOT_DIR="$PWD/build-installed-headers/install-root" \
+          PKG_CONFIG_PATH="$PWD/build-installed-headers/install-root/usr/lib/pkgconfig:$PWD/build-installed-headers/install-root/usr/lib/x86_64-linux-gnu/pkgconfig" \
+          cc build-installed-headers/header-check.c -o build-installed-headers/header-check \
+            $(pkg-config --cflags --libs librsvg-2.0)

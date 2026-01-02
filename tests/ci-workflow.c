@@ -31,7 +31,8 @@ static void assert_contains_all(const gchar* contents, const gchar* const* needl
 static void test_ci_workflow_has_expected_jobs(void) {
     gchar* contents = load_workflow_contents();
     const gchar* required[] = {
-        "clang:", "gcc:", "asan-ubsan:", "debugoptimized:", "introspection:", "pixbuf-loader:", NULL,
+        "clang:",         "gcc:",           "asan-ubsan:",        "debugoptimized:",
+        "introspection:", "pixbuf-loader:", "installed-headers:", NULL,
     };
 
     assert_contains_all(contents, required);
@@ -49,6 +50,10 @@ static void test_ci_workflow_has_expected_setup_args(void) {
         "--buildtype=debugoptimized",
         "-Dintrospection=${{ matrix.enabled }}",
         "-Dgdk_pixbuf_loader=${{ matrix.enabled }}",
+        "meson setup build-installed-headers",
+        "meson install -C build-installed-headers",
+        "#include <librsvg/rsvg.h>",
+        "librsvg-2.0",
         NULL,
     };
 

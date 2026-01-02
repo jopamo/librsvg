@@ -27,10 +27,10 @@
   
 ### Artifact sanity in CI
 
-* [ ] Add a minimal “installed headers compile test” job:
+* [x] Add a minimal “installed headers compile test” job:
 
-  * [ ] `meson install` into DESTDIR
-  * [ ] compile a tiny program including `#include <librsvg/rsvg.h>` + linking `pkg-config --cflags --libs librsvg-2.0`
+  * [x] `meson install` into DESTDIR
+  * [x] compile a tiny program including `#include <librsvg/rsvg.h>` + linking `pkg-config --cflags --libs librsvg-2.0`
 
 ---
 
