@@ -3,6 +3,7 @@ test_includes = [src_inc, config_inc]
 common_test_sources = ['test-utils.c']
 
 test_programs = {
+  'ci-workflow': ['ci-workflow.c'],
   'rsvg-test': ['rsvg-test.c'],
   'loading': ['loading.c'],
   'crash': ['crash.c'],

@@ -1,0 +1,255 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        env:
+          CC: clang
+        run: meson setup build-clang
+      - name: Build
+        run: meson compile -C build-clang
+      - name: Test
+        run: meson test -C build-clang --print-errorlogs
+
+  gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        env:
+          CC: gcc
+        run: meson setup build-gcc
+      - name: Build
+        run: meson compile -C build-gcc
+      - name: Test
+        run: meson test -C build-gcc --print-errorlogs
+
+  asan-ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        env:
+          CC: clang
+        run: >
+          meson setup build-asan-ubsan
+          -Db_sanitize=address,undefined
+          -Db_lundef=false
+      - name: Build
+        run: meson compile -C build-asan-ubsan
+      - name: Test
+        run: meson test -C build-asan-ubsan --print-errorlogs
+
+  debugoptimized:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        env:
+          CC: gcc
+        run: meson setup build-debugoptimized --buildtype=debugoptimized
+      - name: Build
+        run: meson compile -C build-debugoptimized
+      - name: Test
+        run: meson test -C build-debugoptimized --print-errorlogs
+
+  introspection:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        enabled: [true, false]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        run: >
+          meson setup build-introspection-${{ matrix.enabled }}
+          -Dintrospection=${{ matrix.enabled }}
+      - name: Build
+        run: meson compile -C build-introspection-${{ matrix.enabled }}
+      - name: Test
+        run: meson test -C build-introspection-${{ matrix.enabled }} --print-errorlogs
+
+  pixbuf-loader:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        enabled: [true, false]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev \
+            libxml2-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            gobject-introspection \
+            libgirepository1.0-dev
+      - name: Dependency versions
+        run: |
+          pkg-config --modversion \
+            glib-2.0 \
+            pango \
+            pangocairo \
+            cairo \
+            libxml-2.0 \
+            fontconfig \
+            freetype2
+      - name: Configure
+        run: >
+          meson setup build-pixbuf-${{ matrix.enabled }}
+          -Dgdk_pixbuf_loader=${{ matrix.enabled }}
+      - name: Build
+        run: meson compile -C build-pixbuf-${{ matrix.enabled }}
+      - name: Test
+        run: meson test -C build-pixbuf-${{ matrix.enabled }} --print-errorlogs
