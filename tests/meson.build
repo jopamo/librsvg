@@ -13,6 +13,7 @@ test_programs = {
   'render-crash': ['render-crash.c'],
   'dimensions': ['dimensions.c'],
   'errors': ['errors.c'],
+  'path-builder': ['path-builder.c'],
   'security-check': ['security-check.c'],
   'vulnerability-check': ['vulnerability_check.c'],
   'xss-checks': ['xss_checks.c'],

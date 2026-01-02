@@ -15,7 +15,7 @@
   * [x] `-Dintrospection=true/false` toggle jobs (you already generate `librsvg-enum-types.*` and GIR/typelib when enabled)
   * [x] `-Dpixbuf-loader=true/false` (if you add an option) to isolate loader failures
 * [x] Add a CI step that prints dependency versions (glib, pango, cairo, libxml2, fontconfig, freetype) to help triage
-* [ ] Add a `ci` Meson option (or use `--werror`) so CI can be stricter than local dev
+* [x] Add a `ci` Meson option (or use `--werror`) so CI can be stricter than local dev
 
 ### Meson build ergonomics
 
@@ -45,7 +45,7 @@
 * [ ] Make parse policy explicit and testable:
 
   * [ ] disable external entity resolution and network access
-  * [ ] ensure no XInclude processing for untrusted inputs (you have `tests/fixtures/xinclude.svg` and `secret.txt` already)
+  * [x] ensure no XInclude processing for untrusted inputs (you have `tests/fixtures/xinclude.svg` and `secret.txt` already)
 * [ ] Add “error path determinism”:
 
   * [ ] consistent `GError` domain/message for parse failures so tests don’t flap
@@ -90,7 +90,7 @@ You already have a strong base: `crash.c`, `render-crash.c`, `security-check.c`,
 
     * `G_SLICE=always-malloc`
     * `G_DEBUG=gc-friendly`
-* [ ] Ensure CI uses those setups: `meson test --setup=asan_ubsan --print-errorlogs`
+* [x] Ensure CI uses those setups: `meson test --setup=asan_ubsan --print-errorlogs`
 
 ### Expand existing suites without inventing a new framework
 

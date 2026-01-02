@@ -494,8 +494,7 @@ gchar* cr_declaration_to_string(CRDeclaration const* a_this, gulong a_indent) {
         }
     }
     if (stringue && stringue->str) {
-        result = stringue->str;
-        g_string_free(stringue, FALSE);
+        result = g_string_free(stringue, FALSE);
     }
     return result;
 
@@ -539,8 +538,7 @@ guchar* cr_declaration_list_to_string(CRDeclaration const* a_this, gulong a_inde
             break;
     }
     if (stringue && stringue->str) {
-        result = (guchar*)stringue->str;
-        g_string_free(stringue, FALSE);
+        result = (guchar*)g_string_free(stringue, FALSE);
     }
 
     return result;
@@ -586,8 +584,7 @@ guchar* cr_declaration_list_to_string2(CRDeclaration const* a_this, gulong a_ind
             break;
     }
     if (stringue && stringue->str) {
-        result = (guchar*)stringue->str;
-        g_string_free(stringue, FALSE);
+        result = (guchar*)g_string_free(stringue, FALSE);
     }
 
     return result;

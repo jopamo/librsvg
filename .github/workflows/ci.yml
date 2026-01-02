@@ -39,7 +39,7 @@ jobs:
       - name: Configure
         env:
           CC: clang
-        run: meson setup build-clang
+        run: meson setup build-clang -Dci=true
       - name: Build
         run: meson compile -C build-clang
       - name: Test
@@ -79,7 +79,7 @@ jobs:
       - name: Configure
         env:
           CC: gcc
-        run: meson setup build-gcc
+        run: meson setup build-gcc -Dci=true
       - name: Build
         run: meson compile -C build-gcc
       - name: Test
@@ -123,10 +123,11 @@ jobs:
           meson setup build-asan-ubsan
           -Db_sanitize=address,undefined
           -Db_lundef=false
+          -Dci=true
       - name: Build
         run: meson compile -C build-asan-ubsan
       - name: Test
-        run: meson test -C build-asan-ubsan --print-errorlogs
+        run: meson test -C build-asan-ubsan --setup=asan_ubsan --print-errorlogs
 
   debugoptimized:
     runs-on: ubuntu-latest
@@ -162,7 +163,7 @@ jobs:
       - name: Configure
         env:
           CC: gcc
-        run: meson setup build-debugoptimized --buildtype=debugoptimized
+        run: meson setup build-debugoptimized --buildtype=debugoptimized -Dci=true
       - name: Build
         run: meson compile -C build-debugoptimized
       - name: Test
@@ -206,6 +207,7 @@ jobs:
         run: >
           meson setup build-introspection-${{ matrix.enabled }}
           -Dintrospection=${{ matrix.enabled }}
+          -Dci=true
       - name: Build
         run: meson compile -C build-introspection-${{ matrix.enabled }}
       - name: Test
@@ -249,6 +251,7 @@ jobs:
         run: >
           meson setup build-pixbuf-${{ matrix.enabled }}
           -Dgdk_pixbuf_loader=${{ matrix.enabled }}
+          -Dci=true
       - name: Build
         run: meson compile -C build-pixbuf-${{ matrix.enabled }}
       - name: Test

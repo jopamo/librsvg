@@ -182,8 +182,7 @@ guchar* cr_font_family_to_string(CRFontFamily const* a_this, gboolean a_walk_fon
     status = cr_font_family_to_string_real(a_this, a_walk_font_family_list, &stringue);
 
     if (status == CR_OK && stringue) {
-        result = (guchar*)stringue->str;
-        g_string_free(stringue, FALSE);
+        result = (guchar*)g_string_free(stringue, FALSE);
         stringue = NULL;
     }
     else {

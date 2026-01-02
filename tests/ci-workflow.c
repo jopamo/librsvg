@@ -45,6 +45,7 @@ static void test_ci_workflow_has_expected_setup_args(void) {
         "meson setup build-gcc",
         "-Db_sanitize=address,undefined",
         "-Db_lundef=false",
+        "--setup=asan_ubsan",
         "--buildtype=debugoptimized",
         "-Dintrospection=${{ matrix.enabled }}",
         "-Dgdk_pixbuf_loader=${{ matrix.enabled }}",

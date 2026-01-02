@@ -52,6 +52,8 @@ static void _pattern_add_rsvg_color_stops(cairo_pattern_t* pattern,
     RsvgNode* node;
     guint32 rgba;
 
+    (void)current_color_rgb;
+
     for (i = 0; i < stops->len; i++) {
         node = (RsvgNode*)g_ptr_array_index(stops, i);
         if (RSVG_NODE_TYPE(node) != RSVG_NODE_TYPE_STOP)
@@ -183,6 +185,8 @@ static void _set_source_rsvg_pattern(RsvgDrawingCtx* ctx, RsvgPattern* rsvg_patt
     double scaled_width, scaled_height;
     int pw, ph;
 
+    (void)opacity;
+
     rsvg_pattern = &local_pattern;
     rsvg_pattern_fix_fallback(ctx, rsvg_pattern);
     cr_render = render->cr;
@@ -309,7 +313,6 @@ cleanup:
     cairo_destroy(cr_pattern);
     cairo_surface_destroy(surface);
 
-out:
     if (rsvg_pattern->obj_cbbox || rsvg_pattern->vbox.active)
         _rsvg_pop_view_box(ctx);
 }

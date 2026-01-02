@@ -70,6 +70,8 @@ static char* rsvg_decode_data_uri(const char* uri, char** out_mime_type, gsize* 
     gsize data_len;
     gboolean base64 = FALSE;
 
+    (void)error;
+
     g_assert(out_len != NULL);
     g_assert(strncmp(uri, "data:", 5) == 0);
 
@@ -127,6 +129,8 @@ static char* rsvg_acquire_file_data(const char* uri,
     gchar *path, *data;
     gsize len;
     char* content_type;
+
+    (void)cancellable;
 
     rsvg_return_val_if_fail(uri != NULL, NULL, error);
     g_assert(out_len != NULL);

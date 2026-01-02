@@ -59,7 +59,10 @@ struct _RSVGParsePathCtx {
     double params[7];     /* parameters that have been parsed */
 };
 
-static inline void rsvg_path_builder_ensure_capacity(RsvgPathBuilder* builder, int additional_capacity) {}
+static inline void rsvg_path_builder_ensure_capacity(RsvgPathBuilder* builder, int additional_capacity) {
+    (void)builder;
+    (void)additional_capacity;
+}
 
 static inline void rsvg_path_builder_add_element(RsvgPathBuilder* builder, cairo_path_data_t* data) {
     g_array_append_val(builder->path_data, *data);

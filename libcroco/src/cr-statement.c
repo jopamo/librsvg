@@ -38,6 +38,8 @@ static void parse_font_face_start_font_face_cb(CRDocHandler* a_this, CRParsingLo
     CRStatement* stmt = NULL;
     enum CRStatus status = CR_OK;
 
+    (void)a_location;
+
     stmt = cr_statement_new_at_font_face_rule(NULL, NULL);
     g_return_if_fail(stmt);
 
@@ -73,6 +75,8 @@ static void parse_font_face_property_cb(CRDocHandler* a_this, CRString* a_name, 
     CRDeclaration* decl = NULL;
     CRStatement* stmt = NULL;
     CRStatement** stmtptr = NULL;
+
+    (void)a_important;
 
     g_return_if_fail(a_this && a_name);
 
@@ -129,6 +133,8 @@ static void parse_page_start_page_cb(CRDocHandler* a_this,
     CRStatement* stmt = NULL;
     enum CRStatus status = CR_OK;
     CRString *page_name = NULL, *pseudo_name = NULL;
+
+    (void)a_location;
 
     if (a_name)
         page_name = cr_string_dup(a_name);
@@ -191,6 +197,9 @@ static void parse_page_end_page_cb(CRDocHandler* a_this, CRString* a_name, CRStr
     CRStatement* stmt = NULL;
     CRStatement** stmtptr = NULL;
 
+    (void)a_name;
+    (void)a_pseudo_page;
+
     stmtptr = &stmt;
     status = cr_doc_handler_get_ctxt(a_this, (gpointer*)stmtptr);
     g_return_if_fail(status == CR_OK && stmt);
@@ -204,6 +213,8 @@ static void parse_at_media_start_media_cb(CRDocHandler* a_this, GList* a_media_l
     enum CRStatus status = CR_OK;
     CRStatement* at_media = NULL;
     GList* media_list = NULL;
+
+    (void)a_location;
 
     g_return_if_fail(a_this && a_this->priv);
 
@@ -318,6 +329,8 @@ static void parse_at_media_end_media_cb(CRDocHandler* a_this, GList* a_media_lis
     enum CRStatus status = CR_OK;
     CRStatement* at_media = NULL;
     CRStatement** at_media_ptr = NULL;
+
+    (void)a_media_list;
 
     g_return_if_fail(a_this && a_this->priv);
 
@@ -541,10 +554,8 @@ static gchar* cr_statement_ruleset_to_string(CRStatement const* a_this, glong a_
         cr_utils_dump_n_chars2(' ', stringue, a_indent);
     }
     g_string_append(stringue, "}");
-    result = stringue->str;
-
     if (stringue) {
-        g_string_free(stringue, FALSE);
+        result = g_string_free(stringue, FALSE);
         stringue = NULL;
     }
     if (tmp_str) {
@@ -588,8 +599,7 @@ static gchar* cr_statement_font_face_rule_to_string(CRStatement const* a_this, g
         g_string_append(stringue, "\n}");
     }
     if (stringue) {
-        result = stringue->str;
-        g_string_free(stringue, FALSE);
+        result = g_string_free(stringue, FALSE);
         stringue = NULL;
     }
     return result;
@@ -626,8 +636,7 @@ static gchar* cr_statement_charset_to_string(CRStatement const* a_this, gulong a
         }
     }
     if (stringue) {
-        str = stringue->str;
-        g_string_free(stringue, FALSE);
+        str = g_string_free(stringue, FALSE);
     }
     return str;
 }
@@ -670,8 +679,7 @@ static gchar* cr_statement_at_page_rule_to_string(CRStatement const* a_this, gul
         }
         g_string_append(stringue, "\n}\n");
     }
-    result = stringue->str;
-    g_string_free(stringue, FALSE);
+    result = g_string_free(stringue, FALSE);
     stringue = NULL;
     return result;
 }
@@ -719,8 +727,7 @@ static gchar* cr_statement_media_rule_to_string(CRStatement const* a_this, gulon
         g_string_append(stringue, "\n}");
     }
     if (stringue) {
-        str = stringue->str;
-        g_string_free(stringue, FALSE);
+        str = g_string_free(stringue, FALSE);
     }
     return str;
 }
@@ -763,8 +770,7 @@ static gchar* cr_statement_import_rule_to_string(CRStatement const* a_this, gulo
         g_string_append(stringue, " ;");
     }
     if (stringue) {
-        str = stringue->str;
-        g_string_free(stringue, FALSE);
+        str = g_string_free(stringue, FALSE);
         stringue = NULL;
     }
     return str;
@@ -2230,8 +2236,7 @@ gchar* cr_statement_list_to_string(CRStatement const* a_this, gulong a_indent) {
             str = NULL;
         }
     }
-    str = stringue->str;
-    g_string_free(stringue, FALSE);
+    str = g_string_free(stringue, FALSE);
     return str;
 }
 

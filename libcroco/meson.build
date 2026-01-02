@@ -37,3 +37,13 @@ croco_dep = declare_dependency(
   link_with: libcroco_lib,
   include_directories: include_directories('src'),
 )
+
+libcroco_term_test = executable(
+  'libcroco-term-test',
+  files('tests/test-term.c'),
+  include_directories: include_directories('src'),
+  dependencies: [croco_dep, glib_dep, libxml_dep],
+  install: false,
+)
+
+test('libcroco-term', libcroco_term_test)

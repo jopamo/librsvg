@@ -102,7 +102,14 @@ static void rsvg_cairo_clip_render_surface(RsvgDrawingCtx* ctx,
                                            double src_x,
                                            double src_y,
                                            double w,
-                                           double h) {}
+                                           double h) {
+    (void)ctx;
+    (void)surface;
+    (void)src_x;
+    (void)src_y;
+    (void)w;
+    (void)h;
+}
 
 static void rsvg_cairo_clip_render_free(RsvgRender* self) {
     RsvgCairoClipRender* clip_render = RSVG_CAIRO_CLIP_RENDER(self);
@@ -110,11 +117,21 @@ static void rsvg_cairo_clip_render_free(RsvgRender* self) {
     g_free(clip_render);
 }
 
-static void rsvg_cairo_clip_push_discrete_layer(RsvgDrawingCtx* ctx) {}
+static void rsvg_cairo_clip_push_discrete_layer(RsvgDrawingCtx* ctx) {
+    (void)ctx;
+}
 
-static void rsvg_cairo_clip_pop_discrete_layer(RsvgDrawingCtx* ctx) {}
+static void rsvg_cairo_clip_pop_discrete_layer(RsvgDrawingCtx* ctx) {
+    (void)ctx;
+}
 
-static void rsvg_cairo_clip_add_clipping_rect(RsvgDrawingCtx* ctx, double x, double y, double w, double h) {}
+static void rsvg_cairo_clip_add_clipping_rect(RsvgDrawingCtx* ctx, double x, double y, double w, double h) {
+    (void)ctx;
+    (void)x;
+    (void)y;
+    (void)w;
+    (void)h;
+}
 
 static RsvgRender* rsvg_cairo_clip_render_new(cairo_t* cr, RsvgCairoRender* parent) {
     RsvgCairoClipRender* clip_render = g_new0(RsvgCairoClipRender, 1);

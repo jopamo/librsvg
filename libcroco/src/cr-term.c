@@ -48,6 +48,7 @@ static void cr_term_clear(CRTerm* a_this) {
                 cr_term_destroy(a_this->ext_content.func_param);
                 a_this->ext_content.func_param = NULL;
             }
+            /* fall through */
         case TERM_STRING:
         case TERM_IDENT:
         case TERM_URI:
@@ -412,8 +413,7 @@ guchar* cr_term_to_string(CRTerm const* a_this) {
     }
 
     if (str_buf) {
-        result = (guchar*)str_buf->str;
-        g_string_free(str_buf, FALSE);
+        result = (guchar*)g_string_free(str_buf, FALSE);
         str_buf = NULL;
     }
 
@@ -581,8 +581,7 @@ guchar* cr_term_one_to_string(CRTerm const* a_this) {
     }
 
     if (str_buf) {
-        result = (guchar*)str_buf->str;
-        g_string_free(str_buf, FALSE);
+        result = (guchar*)g_string_free(str_buf, FALSE);
         str_buf = NULL;
     }
 

@@ -181,6 +181,8 @@ static void start_font_face(CRDocHandler* a_this, CRParsingLocation* a_location)
     ParsingContext* ctxt = NULL;
     ParsingContext** ctxtptr = NULL;
 
+    (void)a_location;
+
     g_return_if_fail(a_this);
 
     g_return_if_fail(a_this);
@@ -267,6 +269,8 @@ static void charset(CRDocHandler* a_this, CRString* a_charset, CRParsingLocation
     ParsingContext* ctxt = NULL;
     ParsingContext** ctxtptr = NULL;
 
+    (void)a_location;
+
     g_return_if_fail(a_this);
     ctxtptr = &ctxt;
     status = cr_doc_handler_get_ctxt(a_this, (gpointer*)ctxtptr);
@@ -295,6 +299,8 @@ static void start_page(CRDocHandler* a_this, CRString* a_page, CRString* a_pseud
     enum CRStatus status = CR_OK;
     ParsingContext* ctxt = NULL;
     ParsingContext** ctxtptr = NULL;
+
+    (void)a_location;
 
     g_return_if_fail(a_this);
     ctxtptr = &ctxt;
@@ -365,6 +371,8 @@ static void start_media(CRDocHandler* a_this, GList* a_media_list, CRParsingLoca
     ParsingContext** ctxtptr = NULL;
     GList* media_list = NULL;
 
+    (void)a_location;
+
     g_return_if_fail(a_this);
     ctxtptr = &ctxt;
     status = cr_doc_handler_get_ctxt(a_this, (gpointer*)ctxtptr);
@@ -424,6 +432,7 @@ static void import_style(CRDocHandler* a_this,
     GList* media_list = NULL;
 
     (void)a_uri_default_ns;
+    (void)a_location;
 
     g_return_if_fail(a_this);
 

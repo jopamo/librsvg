@@ -436,6 +436,8 @@ static gboolean find_incoming_directionality_backwards(Segment* segments,
     int j;
     gboolean found;
 
+    (void)num_segments;
+
     /* "go backwards ... within the current subpath until ... segment which has directionality at its end point" */
 
     found = FALSE;

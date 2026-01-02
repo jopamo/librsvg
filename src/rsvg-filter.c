@@ -2086,6 +2086,9 @@ RsvgNode* rsvg_new_filter_primitive_merge(void) {
 
 static void rsvg_filter_primitive_merge_node_set_atts(RsvgNode* self, RsvgHandle* ctx, RsvgPropertyBag* atts) {
     const char* value;
+
+    (void)ctx;
+
     if (rsvg_property_bag_size(atts)) {
         /* see bug 145149 - sodipodi generates bad SVG... */
         if ((value = rsvg_property_bag_lookup(atts, "in")))
@@ -2103,6 +2106,8 @@ static void rsvg_filter_primitive_merge_node_free(RsvgNode* self) {
 }
 
 static void rsvg_filter_primitive_merge_node_render(RsvgFilterPrimitive* self, RsvgFilterContext* ctx) {
+    (void)self;
+    (void)ctx;
     /* todo */
 }
 
@@ -2384,18 +2389,19 @@ struct _RsvgFilterPrimitiveComponentTransfer {
 };
 
 static gint identity_component_transfer_func(gint C, RsvgNodeComponentTransferFunc* user_data) {
+    (void)user_data;
     return C;
 }
 
 static gint table_component_transfer_func(gint C, RsvgNodeComponentTransferFunc* user_data) {
-    guint k;
+    gint k;
     gint vk, vk1, distancefromlast;
-    guint num_values;
+    gint num_values;
 
     if (!user_data->nbTableValues)
         return C;
 
-    num_values = user_data->nbTableValues;
+    num_values = (gint)user_data->nbTableValues;
 
     k = (C * (num_values - 1)) / 255;
 
@@ -2570,6 +2576,8 @@ RsvgNode* rsvg_new_filter_primitive_component_transfer(void) {
 static void rsvg_node_component_transfer_function_set_atts(RsvgNode* self, RsvgHandle* ctx, RsvgPropertyBag* atts) {
     const char* value;
     RsvgNodeComponentTransferFunc* data = (RsvgNodeComponentTransferFunc*)self;
+
+    (void)ctx;
 
     if (rsvg_property_bag_size(atts)) {
         if ((value = rsvg_property_bag_lookup(atts, "type"))) {
@@ -4071,6 +4079,8 @@ static vector3 get_light_color(RsvgNodeLightSource* source,
 static void rsvg_node_light_source_set_atts(RsvgNode* self, RsvgHandle* ctx, RsvgPropertyBag* atts) {
     RsvgNodeLightSource* data;
     const char* value;
+
+    (void)ctx;
 
     data = (RsvgNodeLightSource*)self;
 
