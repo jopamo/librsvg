@@ -1,9 +1,11 @@
 test_includes = [src_inc, config_inc]
+python3 = find_program('python3')
 
 common_test_sources = ['test-utils.c']
 
 test_programs = {
   'ci-workflow': ['ci-workflow.c'],
+  'test-setup-config': ['test-setup-config.c'],
   'rsvg-test': ['rsvg-test.c'],
   'loading': ['loading.c'],
   'crash': ['crash.c'],
@@ -16,11 +18,56 @@ test_programs = {
   'xss-checks': ['xss_checks.c'],
 }
 
+if get_option('ci')
+  test_programs += {'ci-option': ['ci-option.c']}
+endif
+
 test_env_common = environment({
   'G_TEST_SRCDIR': meson.current_source_dir(),
   'G_TEST_BUILDDIR': meson.current_build_dir(),
   'G_TEST_DIST': meson.current_source_dir(),
 })
+
+targets_env = test_env_common
+run_clang_tidy = find_program('run-clang-tidy', required: false)
+clang_tidy = find_program('clang-tidy', required: false)
+if run_clang_tidy.found() and clang_tidy.found()
+  targets_env.set('RSVG_EXPECT_CLANG_TIDY', '1')
+endif
+scan_build = find_program('scan-build', required: false)
+if scan_build.found()
+  targets_env.set('RSVG_EXPECT_SCAN_BUILD', '1')
+endif
+test(
+  'build-targets',
+  python3,
+  args: files('check-build-targets.py'),
+  env: targets_env,
+  timeout: 60,
+)
+
+asan_env = environment({
+  'ASAN_OPTIONS': 'halt_on_error=1:detect_leaks=1:strict_string_checks=1',
+})
+
+ubsan_env = environment({
+  'UBSAN_OPTIONS': 'halt_on_error=1:print_stacktrace=1',
+})
+
+asan_ubsan_env = environment({
+  'ASAN_OPTIONS': 'halt_on_error=1:detect_leaks=1:strict_string_checks=1',
+  'UBSAN_OPTIONS': 'halt_on_error=1:print_stacktrace=1',
+})
+
+glib_debug_env = environment({
+  'G_SLICE': 'always-malloc',
+  'G_DEBUG': 'gc-friendly',
+})
+
+add_test_setup('asan', env: asan_env)
+add_test_setup('ubsan', env: ubsan_env)
+add_test_setup('asan_ubsan', env: asan_ubsan_env)
+add_test_setup('glib_debug', env: glib_debug_env)
 
 foreach name, sources : test_programs
   exe = executable(

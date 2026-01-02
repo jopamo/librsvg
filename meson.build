@@ -22,6 +22,12 @@ endif
 if cc.has_argument('-Wno-#warnings')
   add_project_arguments('-Wno-#warnings', language: 'c')
 endif
+if get_option('ci') and cc.has_argument('-Werror')
+  add_project_arguments('-Werror', language: 'c')
+  if cc.has_argument('-Wno-error=cpp')
+    add_project_arguments('-Wno-error=cpp', language: 'c')
+  endif
+endif
 m_dep = cc.find_library('m', required: false)
 
 glib_dep = dependency('glib-2.0', version: '>=2.12.0')
@@ -58,6 +64,7 @@ config_conf.set('HAVE_LC_MESSAGES', cc.has_header_symbol('locale.h', 'LC_MESSAGE
 config_conf.set('HAVE_PANGOFT2', pangoft2_dep.found())
 config_conf.set('HAVE_FLOAT_H', cc.has_header('float.h'))
 config_conf.set('HAVE_UNISTD_H', cc.has_header('unistd.h') ? 1 : false)
+config_conf.set('RSVG_CI', get_option('ci') ? 1 : 0)
 config_conf.set('PACKAGE', 'librsvg')
 config_conf.set('PACKAGE_NAME', 'librsvg')
 config_conf.set('PACKAGE_TARNAME', 'librsvg')
@@ -76,6 +83,23 @@ src_inc = include_directories('src')
 incdir = join_paths(get_option('includedir'), 'librsvg-2.0', 'librsvg')
 
 subdir('src')
+
+run_clang_tidy = find_program('run-clang-tidy', required: false)
+clang_tidy = find_program('clang-tidy', required: false)
+if run_clang_tidy.found() and clang_tidy.found()
+  run_target(
+    'clang-tidy',
+    command: [run_clang_tidy, '-p', meson.current_build_dir()],
+  )
+endif
+
+scan_build = find_program('scan-build', required: false)
+if scan_build.found()
+  run_target(
+    'scan-build-analysis',
+    command: [scan_build, 'meson', 'compile', '-C', meson.current_build_dir()],
+  )
+endif
 
 if get_option('gdk_pixbuf_loader')
   subdir('gdk-pixbuf-loader')

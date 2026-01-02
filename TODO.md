@@ -21,13 +21,10 @@
 
 * [ ] In root `meson.build`, add build targets/helpers:
 
-  * [ ] `ninja -C build test-asan` style alias via `meson.add_test_setup()` named setups: `asan`, `ubsan`, `asan-ubsan`
+  * [x] `ninja -C build test-asan` style alias via `meson.add_test_setup()` named setups: `asan`, `ubsan`, `asan_ubsan`
   * [ ] `clang-tidy` convenience target that requires `compile_commands.json`
   * [ ] `scan-build` convenience target (or documented script in `tests/`)
-* [ ] Document “known good” toolchains in `doc/` or `TODO.md`:
-
-  * [ ] minimum Meson/Ninja/clang/gcc versions you expect
-
+  
 ### Artifact sanity in CI
 
 * [ ] Add a minimal “installed headers compile test” job:
@@ -44,6 +41,7 @@
 * [ ] Replace deprecated SAX usage that triggers warnings on new libxml2
 
   * [ ] wrap libxml2 setup in a small internal module so only `rsvg-xml.c` touches libxml2 quirks
+  * [x] fix `xmlStructuredErrorFunc` signature mismatch in `src/rsvg-css.c` for libxml2 >= 2.16
 * [ ] Make parse policy explicit and testable:
 
   * [ ] disable external entity resolution and network access
@@ -82,17 +80,17 @@ You already have a strong base: `crash.c`, `render-crash.c`, `security-check.c`,
 
 ### Test execution hardening (in `tests/meson.build`)
 
-* [ ] Add Meson test setups:
+* [x] Add Meson test setups:
 
-  * [ ] `asan-ubsan` with:
+  * [x] `asan_ubsan` with:
 
     * `ASAN_OPTIONS=halt_on_error=1:detect_leaks=1:strict_string_checks=1`
     * `UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1`
-  * [ ] `glib-debug` with:
+  * [x] `glib_debug` with:
 
     * `G_SLICE=always-malloc`
     * `G_DEBUG=gc-friendly`
-* [ ] Ensure CI uses those setups: `meson test --setup=asan-ubsan --print-errorlogs`
+* [ ] Ensure CI uses those setups: `meson test --setup=asan_ubsan --print-errorlogs`
 
 ### Expand existing suites without inventing a new framework
 
