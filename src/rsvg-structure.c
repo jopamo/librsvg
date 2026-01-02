@@ -74,9 +74,17 @@ void _rsvg_node_draw_children(RsvgNode* self, RsvgDrawingCtx* ctx, int dominate)
 }
 
 /* generic function that doesn't draw anything at all */
-static void _rsvg_node_draw_nothing(RsvgNode* self, RsvgDrawingCtx* ctx, int dominate) {}
+static void _rsvg_node_draw_nothing(RsvgNode* self, RsvgDrawingCtx* ctx, int dominate) {
+    (void)self;
+    (void)ctx;
+    (void)dominate;
+}
 
-static void _rsvg_node_dont_set_atts(RsvgNode* node, RsvgHandle* ctx, RsvgPropertyBag* atts) {}
+static void _rsvg_node_dont_set_atts(RsvgNode* node, RsvgHandle* ctx, RsvgPropertyBag* atts) {
+    (void)node;
+    (void)ctx;
+    (void)atts;
+}
 
 void _rsvg_node_init(RsvgNode* self, RsvgNodeType type) {
     self->type = type;

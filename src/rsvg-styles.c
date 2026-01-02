@@ -41,19 +41,15 @@
 
 #define RSVG_DEFAULT_FONT "Times New Roman"
 
-enum {
-    SHAPE_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT,
-    SHAPE_RENDERING_OPTIMIZE_SPEED = CAIRO_ANTIALIAS_NONE,
-    SHAPE_RENDERING_CRISP_EDGES = CAIRO_ANTIALIAS_NONE,
-    SHAPE_RENDERING_GEOMETRIC_PRECISION = CAIRO_ANTIALIAS_DEFAULT
-};
+static const cairo_antialias_t SHAPE_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT;
+static const cairo_antialias_t SHAPE_RENDERING_OPTIMIZE_SPEED = CAIRO_ANTIALIAS_NONE;
+static const cairo_antialias_t SHAPE_RENDERING_CRISP_EDGES = CAIRO_ANTIALIAS_NONE;
+static const cairo_antialias_t SHAPE_RENDERING_GEOMETRIC_PRECISION = CAIRO_ANTIALIAS_DEFAULT;
 
-enum {
-    TEXT_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT,
-    TEXT_RENDERING_OPTIMIZE_SPEED = CAIRO_ANTIALIAS_NONE,
-    TEXT_RENDERING_OPTIMIZE_LEGIBILITY = CAIRO_ANTIALIAS_DEFAULT,
-    TEXT_RENDERING_GEOMETRIC_PRECISION = CAIRO_ANTIALIAS_DEFAULT
-};
+static const cairo_antialias_t TEXT_RENDERING_AUTO = CAIRO_ANTIALIAS_DEFAULT;
+static const cairo_antialias_t TEXT_RENDERING_OPTIMIZE_SPEED = CAIRO_ANTIALIAS_NONE;
+static const cairo_antialias_t TEXT_RENDERING_OPTIMIZE_LEGIBILITY = CAIRO_ANTIALIAS_DEFAULT;
+static const cairo_antialias_t TEXT_RENDERING_GEOMETRIC_PRECISION = CAIRO_ANTIALIAS_DEFAULT;
 
 typedef struct _StyleValueData {
     gchar* value;
@@ -376,6 +372,7 @@ static void rsvg_state_inherit_run(RsvgState* dst,
 */
 
 static int reinheritfunction(int dst, int src) {
+    (void)src;
     if (!dst)
         return 1;
     return 0;
@@ -407,6 +404,8 @@ void rsvg_state_dominate(RsvgState* dst, const RsvgState* src) {
 /* copy everything inheritable from the src to the dst */
 
 static int clonefunction(int dst, int src) {
+    (void)dst;
+    (void)src;
     return 1;
 }
 
@@ -422,6 +421,7 @@ void rsvg_state_override(RsvgState* dst, const RsvgState* src) {
 */
 
 static int inheritfunction(int dst, int src) {
+    (void)dst;
     return src;
 }
 
@@ -457,6 +457,8 @@ static void rsvg_parse_style_pair(RsvgHandle* ctx,
                                   const gchar* value,
                                   gboolean important) {
     StyleValueData* data;
+
+    (void)ctx;
 
     data = g_hash_table_lookup(state->styles, name);
     if (data && data->important && !important)
@@ -1074,6 +1076,8 @@ static void ccss_end_selector(CRDocHandler* a_handler, CRSelector* a_selector_li
 
     g_return_if_fail(a_handler);
 
+    (void)a_selector_list;
+
     user_data = (CSSUserData*)a_handler->app_data;
 
     cr_selector_unref(user_data->selector);
@@ -1111,12 +1115,14 @@ static void ccss_property(CRDocHandler* a_handler, CRString* a_name, CRTerm* a_e
 }
 
 static void ccss_error(CRDocHandler* a_handler) {
+    (void)a_handler;
     /* yup, like i care about CSS parsing errors ;-)
        ignore, chug along */
     g_warning(_("CSS parsing error\n"));
 }
 
 static void ccss_unrecoverable_error(CRDocHandler* a_handler) {
+    (void)a_handler;
     /* yup, like i care about CSS parsing errors ;-)
        ignore, chug along */
     g_warning(_("CSS unrecoverable error\n"));
@@ -1187,6 +1193,10 @@ static void ccss_import_style(CRDocHandler* a_this,
     char* stylesheet_data;
     gsize stylesheet_data_len;
     char* mime_type = NULL;
+
+    (void)a_media_list;
+    (void)a_uri_default_ns;
+    (void)a_location;
 
     if (a_uri == NULL)
         return;
@@ -1363,6 +1373,8 @@ invalid:
  **/
 static void rsvg_parse_transform_attr(RsvgHandle* ctx, RsvgState* state, const char* str) {
     cairo_matrix_t affine;
+
+    (void)ctx;
 
     if (rsvg_parse_transform(&affine, str)) {
         cairo_matrix_multiply(&state->personal_affine, &affine, &state->personal_affine);

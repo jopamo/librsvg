@@ -2,3 +2,4 @@ option('introspection', type: 'feature', value: 'auto', description: 'Build GObj
 option('gdk_pixbuf_loader', type: 'boolean', value: true, description: 'Build the gdk-pixbuf loader module')
 option('gtk_demo', type: 'feature', value: 'auto', description: 'Build the GTK rsvg-view-3 utility')
 option('dev_tools', type: 'boolean', value: true, description: 'Build auxiliary developer tools (dimensions/performance)')
+option('ci', type: 'boolean', value: false, description: 'Enable stricter CI build settings')
