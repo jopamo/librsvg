@@ -102,7 +102,7 @@ static const FixtureData fixtures[] = {
     {"/styles/!important/stroke", "379629", "styles/bug379629.svg", "#base_shadow", "stroke",
      .expected.color = 0xffffc0cb /* pink */},
     {"/styles/!important/stroke-width", "379629", "styles/bug379629.svg", "#base_shadow", "stroke-width",
-     .expected.length = {POINTS_LENGTH(5.), 'i'}},
+     .expected.length = {POINTS_LENGTH(5.), RSVG_LENGTH_UNIT_IN, 'i'}},
     {"/styles/!important/class", "614606", "styles/bug614606.svg", "#path6306", "fill",
      .expected.color = 0xffff0000 /* red */},
     {"/styles/!important/element", "614606", "styles/bug614606.svg", "#path6308", "fill", .expected.color = 0xff000000},
