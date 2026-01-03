@@ -75,6 +75,7 @@ typedef struct RsvgHandlePrivate RsvgHandlePrivate;
 typedef struct _RsvgHandleClass RsvgHandleClass;
 typedef struct _RsvgDimensionData RsvgDimensionData;
 typedef struct _RsvgPositionData RsvgPositionData;
+typedef struct _RsvgRectangle RsvgRectangle;
 
 /**
  * RsvgHandleClass:
@@ -125,6 +126,20 @@ struct _RsvgPositionData {
     int y;
 };
 
+/**
+ * RsvgRectangle:
+ * @x: left side of the rectangle, in pixels
+ * @y: top side of the rectangle, in pixels
+ * @width: rectangle's width, in pixels
+ * @height: rectangle's height, in pixels
+ */
+struct _RsvgRectangle {
+    gdouble x;
+    gdouble y;
+    gdouble width;
+    gdouble height;
+};
+
 void rsvg_cleanup(void);
 
 void rsvg_set_default_dpi(double dpi);
@@ -146,6 +161,8 @@ void rsvg_handle_get_dimensions(RsvgHandle* handle, RsvgDimensionData* dimension
 
 gboolean rsvg_handle_get_dimensions_sub(RsvgHandle* handle, RsvgDimensionData* dimension_data, const char* id);
 gboolean rsvg_handle_get_position_sub(RsvgHandle* handle, RsvgPositionData* position_data, const char* id);
+
+gboolean rsvg_handle_get_intrinsic_size_in_pixels(RsvgHandle* handle, gdouble* out_width, gdouble* out_height);
 
 gboolean rsvg_handle_has_sub(RsvgHandle* handle, const char* id);
 

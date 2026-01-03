@@ -1167,6 +1167,51 @@ void rsvg_handle_get_dimensions(RsvgHandle* handle, RsvgDimensionData* dimension
 }
 
 /**
+ * rsvg_handle_get_intrinsic_size_in_pixels:
+ * @handle: A #RsvgHandle
+ * @out_width: (out) (optional): where to store the width in pixels
+ * @out_height: (out) (optional): where to store the height in pixels
+ *
+ * Returns the intrinsic size for the SVG, if it is specified in absolute
+ * units that can be resolved to pixels.
+ *
+ * Returns: %TRUE if a pixel size can be computed
+ */
+gboolean rsvg_handle_get_intrinsic_size_in_pixels(RsvgHandle* handle, gdouble* out_width, gdouble* out_height) {
+    RsvgNodeSvg* root;
+    gdouble width;
+    gdouble height;
+
+    g_return_val_if_fail(handle != NULL, FALSE);
+
+    root = (RsvgNodeSvg*)handle->priv->treebase;
+    if (!root)
+        return FALSE;
+
+    if (root->w.length == -1 || root->h.length == -1)
+        return FALSE;
+
+    if (root->w.factor == 'p' || root->h.factor == 'p')
+        return FALSE;
+
+    if (root->w.factor == 'm' || root->w.factor == 'x' || root->w.factor == 'l' || root->w.factor == 's')
+        return FALSE;
+
+    if (root->h.factor == 'm' || root->h.factor == 'x' || root->h.factor == 'l' || root->h.factor == 's')
+        return FALSE;
+
+    width = _rsvg_css_hand_normalize_length(&root->w, handle->priv->dpi_x, 0, 12);
+    height = _rsvg_css_hand_normalize_length(&root->h, handle->priv->dpi_y, 0, 12);
+
+    if (out_width)
+        *out_width = width;
+    if (out_height)
+        *out_height = height;
+
+    return TRUE;
+}
+
+/**
  * rsvg_handle_get_dimensions_sub:
  * @handle: A #RsvgHandle
  * @dimension_data: (out): A place to store the SVG's size

@@ -282,3 +282,56 @@ gboolean rsvg_handle_render_cairo_sub(RsvgHandle* handle, cairo_t* cr, const cha
 gboolean rsvg_handle_render_cairo(RsvgHandle* handle, cairo_t* cr) {
     return rsvg_handle_render_cairo_sub(handle, cr, NULL);
 }
+
+/**
+ * rsvg_handle_render_document:
+ * @handle: A #RsvgHandle
+ * @cr: A Cairo renderer
+ * @viewport: (nullable): viewport to render into, in pixels
+ * @error: (out) (optional): return location for a #GError, or %NULL
+ *
+ * Draws an SVG to a Cairo surface, scaled into the provided viewport.
+ *
+ * Returns: %TRUE if drawing succeeded.
+ */
+gboolean rsvg_handle_render_document(RsvgHandle* handle, cairo_t* cr, const RsvgRectangle* viewport, GError** error) {
+    RsvgDimensionData dimensions;
+    gdouble intrinsic_width = 0.0;
+    gdouble intrinsic_height = 0.0;
+    gboolean retval;
+
+    g_return_val_if_fail(handle != NULL, FALSE);
+    g_return_val_if_fail(cr != NULL, FALSE);
+
+    if (!viewport) {
+        retval = rsvg_handle_render_cairo(handle, cr);
+        if (!retval && error && *error == NULL)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Rendering failed");
+        return retval;
+    }
+
+    if (!rsvg_handle_get_intrinsic_size_in_pixels(handle, &intrinsic_width, &intrinsic_height)) {
+        rsvg_handle_get_dimensions(handle, &dimensions);
+        intrinsic_width = dimensions.width;
+        intrinsic_height = dimensions.height;
+    }
+
+    if (intrinsic_width == 0.0 || intrinsic_height == 0.0) {
+        if (error && *error == NULL)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "SVG has invalid intrinsic size");
+        return FALSE;
+    }
+
+    cairo_save(cr);
+    cairo_translate(cr, viewport->x, viewport->y);
+    cairo_scale(cr, viewport->width / intrinsic_width, viewport->height / intrinsic_height);
+
+    retval = rsvg_handle_render_cairo(handle, cr);
+
+    cairo_restore(cr);
+
+    if (!retval && error && *error == NULL)
+        g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Rendering failed");
+
+    return retval;
+}

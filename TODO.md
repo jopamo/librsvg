@@ -199,9 +199,10 @@ This makes future replacement feasible and makes fuzzing focused.
 * [ ] Make tokenizer/parser functions accept length-bounded spans, not rely on NUL-terminated strings
 * [ ] Add overflow checks in:
 
-  * `libcroco/src/cr-tknzr.c`
-  * `libcroco/src/cr-parser.c`
-  * `libcroco/src/cr-om-parser.c`
+  * [ ] `libcroco/src/cr-tknzr.c`
+  * [ ] `libcroco/src/cr-parser.c`
+  * [ ] `libcroco/src/cr-om-parser.c`
+  * [x] `libcroco/src/cr-input.c` (partially done)
 
 ---
 

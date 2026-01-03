@@ -25,6 +25,7 @@
 #include <string.h>
 #include "cr-input.h"
 #include "cr-enc-handler.h"
+#include "cr-safe-math.h"
 
 /**
  *@CRInput:
@@ -226,7 +227,12 @@ CRInput* cr_input_new_from_uri(const gchar* a_file_uri, enum CREncoding a_enc) {
 
         if (status == CR_OK) {
             /*read went well */
-            buf = g_realloc(buf, len + CR_INPUT_MEM_CHUNK_SIZE);
+            gsize new_size;
+            if (!cr_safe_size_add(len, CR_INPUT_MEM_CHUNK_SIZE, &new_size)) {
+                status = CR_ERROR;
+                goto cleanup;
+            }
+            buf = g_realloc(buf, new_size);
             memcpy(buf + len, tmp_buf, nb_read);
             len += nb_read;
         }
