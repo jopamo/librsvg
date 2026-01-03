@@ -48,12 +48,6 @@ meson test -C build --print-errorlogs
 
 See `tests/README.md` for reftests and fixture details.
 
-## Documentation
-
-- Developer workflow: `doc/DEVELOPING.md`
-- Static analysis: `doc/STATIC_ANALYSIS.md`
-- API/ABI reference: `librsvg-api-abi.md`
-
 ## Project layout (high level)
 
 - `src/`: core library implementation
