@@ -29,7 +29,7 @@ static void assert_equal_color(guint expected, guint actual) {
 
 static void assert_equal_length(const RsvgLength* expected, const RsvgLength* actual) {
     g_assert_cmpfloat(expected->length, ==, actual->length);
-    g_assert_cmpint(expected->factor, ==, actual->factor);
+    g_assert_cmpint(expected->unit, ==, actual->unit);
 }
 
 static void assert_equal_value(const FixtureData* fixture, RsvgNode* node) {
