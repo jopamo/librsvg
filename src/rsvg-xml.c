@@ -29,6 +29,23 @@
 static xmlSAXHandler rsvg_sax_handler;
 static gboolean rsvg_sax_handler_inited = FALSE;
 
+static void rsvg_xml_init_limits(void) {
+    static gboolean limits_inited = FALSE;
+    if (limits_inited)
+        return;
+    limits_inited = TRUE;
+
+#ifdef XML_PARSE_LIMIT_DEPTH
+    xmlParserMaxDepth = 256;
+#endif
+#ifdef XML_PARSE_LIMIT_ENTITY_EXPANSION
+    xmlParserMaxEntityExpansions = 100000;
+#endif
+#ifdef XML_PARSE_LIMIT_ENTITY_SIZE
+    xmlParserMaxEntitySize = 10 * 1024 * 1024; /* 10 MB */
+#endif
+}
+
 typedef struct {
     GInputStream* stream;
     GCancellable* cancellable;
@@ -55,6 +72,8 @@ static void rsvg_xml_end_element_sax1(void* ctx, const xmlChar* name) {
 
 static void rsvg_xml_init_sax_handler(void) {
     const RsvgSaxCallbacks* callbacks;
+
+    rsvg_xml_init_limits();
 
     if (rsvg_sax_handler_inited)
         return;
@@ -103,6 +122,17 @@ void rsvg_xml_configure_parser(xmlParserCtxtPtr parser, RsvgHandle* handle) {
 
     if (handle && (handle->priv->flags & RSVG_HANDLE_FLAG_UNLIMITED)) {
         options |= XML_PARSE_HUGE;
+    }
+    else {
+#ifdef XML_PARSE_LIMIT_DEPTH
+        options |= XML_PARSE_LIMIT_DEPTH;
+#endif
+#ifdef XML_PARSE_LIMIT_ENTITY_EXPANSION
+        options |= XML_PARSE_LIMIT_ENTITY_EXPANSION;
+#endif
+#ifdef XML_PARSE_LIMIT_ENTITY_SIZE
+        options |= XML_PARSE_LIMIT_ENTITY_SIZE;
+#endif
     }
 
 #ifdef XML_PARSE_NO_XXE
