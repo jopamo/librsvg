@@ -158,8 +158,10 @@ void fill_vtable(GdkPixbufModule* module) {
 }
 
 void fill_info(GdkPixbufFormat* info) {
-    static const GdkPixbufModulePattern signature[] = {
-        {" <svg", "*    ", 100}, {" <!DOCTYPE svg", "*             ", 100}, {NULL, NULL, 0}};
+    static const GdkPixbufModulePattern signature[] = {{" <svg", "*    ", 100},
+                                                       {" <!DOCTYPE svg", "*             ", 100},
+                                                       {"\x1f\x8b\x08", "   ", 10},
+                                                       {NULL, NULL, 0}};
 
     static const gchar* mime_types[] = {/* yes folks, i actually have run into all of these in the wild... */
                                         "image/svg+xml",

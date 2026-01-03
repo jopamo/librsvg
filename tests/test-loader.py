@@ -23,6 +23,7 @@ def main():
         f.write('"svg" "svgz" "svg.gz" ""\n')
         f.write('" <svg" "*    " 100\n')
         f.write('" <!DOCTYPE svg" "*             " 100\n')
+        f.write('"\\x1f\\x8b\\x08" "   " 10\n')
         f.write('\n')
 
     env = os.environ.copy()
