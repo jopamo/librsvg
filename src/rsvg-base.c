@@ -1211,6 +1211,80 @@ gboolean rsvg_handle_get_intrinsic_size_in_pixels(RsvgHandle* handle, gdouble* o
     return TRUE;
 }
 
+static RsvgLengthUnit rsvg_length_unit_from_factor(char factor) {
+    switch (factor) {
+        case 'p':
+            return RSVG_LENGTH_UNIT_PERCENT;
+        case 'm':
+            return RSVG_LENGTH_UNIT_EM;
+        case 'x':
+            return RSVG_LENGTH_UNIT_EX;
+        case 'i':
+            return RSVG_LENGTH_UNIT_IN;
+        case 'l':
+        case 's':
+        default:
+            return RSVG_LENGTH_UNIT_PX;
+    }
+}
+
+void rsvg_handle_get_intrinsic_dimensions(RsvgHandle* handle,
+                                          gboolean* out_has_width,
+                                          RsvgLength* out_width,
+                                          gboolean* out_has_height,
+                                          RsvgLength* out_height,
+                                          gboolean* out_has_viewbox,
+                                          RsvgRectangle* out_viewbox) {
+    RsvgNodeSvg* root;
+
+    g_return_if_fail(handle != NULL);
+
+    root = (RsvgNodeSvg*)handle->priv->treebase;
+    if (!root) {
+        if (out_has_width)
+            *out_has_width = FALSE;
+        if (out_has_height)
+            *out_has_height = FALSE;
+        if (out_has_viewbox)
+            *out_has_viewbox = FALSE;
+        return;
+    }
+
+    if (out_has_width)
+        *out_has_width = (root->w.length != -1);
+    if (out_has_height)
+        *out_has_height = (root->h.length != -1);
+    if (out_has_viewbox)
+        *out_has_viewbox = root->vbox.active;
+
+    if (out_width) {
+        out_width->length = root->w.length;
+        out_width->factor = root->w.factor;
+        out_width->unit = rsvg_length_unit_from_factor(root->w.factor);
+    }
+
+    if (out_height) {
+        out_height->length = root->h.length;
+        out_height->factor = root->h.factor;
+        out_height->unit = rsvg_length_unit_from_factor(root->h.factor);
+    }
+
+    if (out_viewbox) {
+        if (root->vbox.active) {
+            out_viewbox->x = root->vbox.rect.x;
+            out_viewbox->y = root->vbox.rect.y;
+            out_viewbox->width = root->vbox.rect.width;
+            out_viewbox->height = root->vbox.rect.height;
+        }
+        else {
+            out_viewbox->x = 0.0;
+            out_viewbox->y = 0.0;
+            out_viewbox->width = 0.0;
+            out_viewbox->height = 0.0;
+        }
+    }
+}
+
 /**
  * rsvg_handle_get_dimensions_sub:
  * @handle: A #RsvgHandle

@@ -251,11 +251,6 @@ static inline RsvgRender* _rsvg_render_check_type(RsvgRender* render, RsvgRender
     ((RenderCType*)_rsvg_render_check_type((render), (render_type)))
 
 typedef struct {
-    double length;
-    char factor;
-} RsvgLength;
-
-typedef struct {
     cairo_rectangle_t rect;
     cairo_matrix_t affine;
     gboolean virgin;

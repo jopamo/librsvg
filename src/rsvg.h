@@ -76,6 +76,7 @@ typedef struct _RsvgHandleClass RsvgHandleClass;
 typedef struct _RsvgDimensionData RsvgDimensionData;
 typedef struct _RsvgPositionData RsvgPositionData;
 typedef struct _RsvgRectangle RsvgRectangle;
+typedef struct _RsvgLength RsvgLength;
 
 /**
  * RsvgHandleClass:
@@ -127,6 +128,42 @@ struct _RsvgPositionData {
 };
 
 /**
+ * RsvgLengthUnit:
+ * @RSVG_LENGTH_UNIT_PX: length in pixels
+ * @RSVG_LENGTH_UNIT_EM: length in ems
+ * @RSVG_LENGTH_UNIT_EX: length in exs
+ * @RSVG_LENGTH_UNIT_IN: length in inches
+ * @RSVG_LENGTH_UNIT_CM: length in centimeters
+ * @RSVG_LENGTH_UNIT_MM: length in millimeters
+ * @RSVG_LENGTH_UNIT_PT: length in points
+ * @RSVG_LENGTH_UNIT_PC: length in picas
+ * @RSVG_LENGTH_UNIT_PERCENT: length in percent
+ */
+typedef enum {
+    RSVG_LENGTH_UNIT_PX,
+    RSVG_LENGTH_UNIT_EM,
+    RSVG_LENGTH_UNIT_EX,
+    RSVG_LENGTH_UNIT_IN,
+    RSVG_LENGTH_UNIT_CM,
+    RSVG_LENGTH_UNIT_MM,
+    RSVG_LENGTH_UNIT_PT,
+    RSVG_LENGTH_UNIT_PC,
+    RSVG_LENGTH_UNIT_PERCENT
+} RsvgLengthUnit;
+
+/**
+ * RsvgLength:
+ * @length: numeric value
+ * @unit: unit for the length
+ * @factor: internal unit marker; do not use directly
+ */
+struct _RsvgLength {
+    gdouble length;
+    RsvgLengthUnit unit;
+    char factor;
+};
+
+/**
  * RsvgRectangle:
  * @x: left side of the rectangle, in pixels
  * @y: top side of the rectangle, in pixels
@@ -163,6 +200,13 @@ gboolean rsvg_handle_get_dimensions_sub(RsvgHandle* handle, RsvgDimensionData* d
 gboolean rsvg_handle_get_position_sub(RsvgHandle* handle, RsvgPositionData* position_data, const char* id);
 
 gboolean rsvg_handle_get_intrinsic_size_in_pixels(RsvgHandle* handle, gdouble* out_width, gdouble* out_height);
+void rsvg_handle_get_intrinsic_dimensions(RsvgHandle* handle,
+                                          gboolean* out_has_width,
+                                          RsvgLength* out_width,
+                                          gboolean* out_has_height,
+                                          RsvgLength* out_height,
+                                          gboolean* out_has_viewbox,
+                                          RsvgRectangle* out_viewbox);
 
 gboolean rsvg_handle_has_sub(RsvgHandle* handle, const char* id);
 
