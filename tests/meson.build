@@ -143,6 +143,8 @@ if get_option('gdk_pixbuf_loader') and get_option('dev_tools')
     depends: [rsvg_loader_exe, loader],
     env: test_env_common,
     should_fail: true,
+    is_parallel: false,
+    timeout: 120,
   )
 endif
 

@@ -1547,6 +1547,7 @@ static enum CRStatus cr_parser_parse_simple_selector(CRParser* a_this, CRSimpleS
     CRToken* token = NULL;
     CRSimpleSel* sel = NULL;
     CRAdditionalSel* add_sel_list = NULL;
+    CRPseudo* pseudo = NULL;
     gboolean found_sel = FALSE;
     guint32 cur_char = 0;
 
@@ -1658,8 +1659,6 @@ static enum CRStatus cr_parser_parse_simple_selector(CRParser* a_this, CRSimpleS
             cr_parsing_location_copy(&add_sel->location, &attr_sel->location);
         }
         else if (token && (token->type == DELIM_TK) && (token->u.unichar == ':')) {
-            CRPseudo* pseudo = NULL;
-
             /*try to parse a pseudo */
 
             if (token) {
@@ -1706,6 +1705,7 @@ static enum CRStatus cr_parser_parse_simple_selector(CRParser* a_this, CRSimpleS
                 cr_parsing_location_copy(&add_sel->location, &pseudo->location);
                 add_sel_list = cr_additional_sel_append(add_sel_list, add_sel);
                 status = CR_OK;
+                pseudo = NULL;
             }
         }
         else {
@@ -1757,6 +1757,11 @@ error:
     if (sel) {
         cr_simple_sel_destroy(sel);
         sel = NULL;
+    }
+
+    if (pseudo) {
+        cr_pseudo_destroy(pseudo);
+        pseudo = NULL;
     }
 
     cr_tknzr_set_cur_pos(PRIVATE(a_this)->tknzr, &init_pos);

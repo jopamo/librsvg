@@ -944,6 +944,11 @@ cleanup:
         parser = NULL;
     }
     if (sac_handler) {
+        CRStatement* dangling = NULL;
+        cr_doc_handler_get_result(sac_handler, (gpointer*)&dangling);
+        if (dangling && dangling != result) {
+            cr_statement_destroy(dangling);
+        }
         cr_doc_handler_unref(sac_handler);
         sac_handler = NULL;
     }
@@ -1076,6 +1081,14 @@ cleanup:
         parser = NULL;
     }
     if (sac_handler) {
+        CRStatement* dangling = NULL;
+
+        cr_doc_handler_get_result(sac_handler, (gpointer*)&dangling);
+
+        if (dangling && dangling != result) {
+            cr_statement_destroy(dangling);
+        }
+
         cr_doc_handler_unref(sac_handler);
         sac_handler = NULL;
     }
@@ -1361,6 +1374,20 @@ cleanup:
         parser = NULL;
     }
     if (sac_handler) {
+        CRStatement* dangling = NULL;
+        CRStatement* ctxt = NULL;
+
+        cr_doc_handler_get_result(sac_handler, (gpointer*)&dangling);
+        cr_doc_handler_get_ctxt(sac_handler, (gpointer*)&ctxt);
+
+        if (dangling && dangling != result) {
+            cr_statement_destroy(dangling);
+        }
+
+        if (ctxt && ctxt != result && ctxt != dangling) {
+            cr_statement_destroy(ctxt);
+        }
+
         cr_doc_handler_unref(sac_handler);
         sac_handler = NULL;
     }
@@ -1560,6 +1587,20 @@ cleanup:
         parser = NULL;
     }
     if (sac_handler) {
+        CRStatement* dangling = NULL;
+        CRStatement* ctxt = NULL;
+
+        cr_doc_handler_get_result(sac_handler, (gpointer*)&dangling);
+        cr_doc_handler_get_ctxt(sac_handler, (gpointer*)&ctxt);
+
+        if (dangling && dangling != result) {
+            cr_statement_destroy(dangling);
+        }
+
+        if (ctxt && ctxt != result && ctxt != dangling) {
+            cr_statement_destroy(ctxt);
+        }
+
         cr_doc_handler_unref(sac_handler);
         sac_handler = NULL;
     }

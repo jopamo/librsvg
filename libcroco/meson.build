@@ -58,3 +58,13 @@ libcroco_term_test = executable(
 )
 
 test('libcroco-term', libcroco_term_test)
+
+libcroco_css_injection_test = executable(
+  'libcroco-css-injection-test',
+  files('tests/test-css-injection.c'),
+  include_directories: include_directories('src'),
+  dependencies: [croco_dep, glib_dep, libxml_dep],
+  install: false,
+)
+
+test('libcroco-css-injection', libcroco_css_injection_test)

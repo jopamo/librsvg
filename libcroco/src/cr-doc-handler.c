@@ -82,6 +82,7 @@ CRDocHandler* cr_doc_handler_new(void) {
         g_free(result);
         return NULL;
     }
+    memset(result->priv, 0, sizeof(CRDocHandlerPriv));
 
     cr_doc_handler_set_default_sac_handler(result);
 
