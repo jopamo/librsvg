@@ -940,6 +940,29 @@ void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri) {
 }
 
 /**
+ * rsvg_handle_set_stylesheet:
+ * @handle: A #RsvgHandle
+ * @css: (array length=css_len): a buffer with CSS data
+ * @css_len: length of the @css buffer in bytes
+ * @error: (allow-none): a location to store a #GError, or %NULL
+ *
+ * Sets a CSS stylesheet to use for an SVG document.
+ *
+ * Returns: %TRUE on success, or %FALSE on error.
+ *
+ * Since: 2.48
+ */
+gboolean rsvg_handle_set_stylesheet(RsvgHandle* handle, const guint8* css, gsize css_len, GError** error) {
+    g_return_val_if_fail(handle != NULL, FALSE);
+    g_return_val_if_fail(css != NULL, FALSE);
+    g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+
+    rsvg_parse_cssbuffer(handle, (const char*)css, (size_t)css_len);
+
+    return TRUE;
+}
+
+/**
  * rsvg_handle_set_base_gfile:
  * @handle: a #RsvgHandle
  * @base_file: a #GFile

@@ -194,6 +194,8 @@ GdkPixbuf* rsvg_handle_get_pixbuf_sub(RsvgHandle* handle, const char* id);
 const char* rsvg_handle_get_base_uri(RsvgHandle* handle);
 void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri);
 
+gboolean rsvg_handle_set_stylesheet(RsvgHandle* handle, const guint8* css, gsize css_len, GError** error);
+
 void rsvg_handle_get_dimensions(RsvgHandle* handle, RsvgDimensionData* dimension_data);
 
 gboolean rsvg_handle_get_dimensions_sub(RsvgHandle* handle, RsvgDimensionData* dimension_data, const char* id);
