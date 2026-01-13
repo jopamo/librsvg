@@ -31,6 +31,7 @@
 #include "rsvg-compat.h"
 #include "rsvg-private.h"
 #include "rsvg-css.h"
+#include "rsvg-css-engine.h"
 #include "rsvg-styles.h"
 #include "rsvg-shapes.h"
 #include "rsvg-structure.h"
@@ -979,69 +980,7 @@ static void rsvg_apply_styles_to_node(RsvgHandle* ctx, RsvgNode* node) {
         rsvg_state_clone(node->state, node->base_state);
     }
 
-    /* 1. universal selector */
-    rsvg_lookup_apply_css_style(ctx, "*", node->state);
-
-    /* 2. tag selector */
-    if (node->name)
-        rsvg_lookup_apply_css_style(ctx, node->name, node->state);
-
-    /* 3. class selectors */
-    if (node->klass) {
-        char** classes = g_strsplit(node->klass, " ", -1);
-        if (classes) {
-            int i;
-            for (i = 0; classes[i]; i++) {
-                if (!classes[i][0])
-                    continue;
-                char* dot_class = g_strdup_printf(".%s", classes[i]);
-
-                /* class */
-                rsvg_lookup_apply_css_style(ctx, dot_class, node->state);
-
-                /* tag.class */
-                if (node->name) {
-                    char* tag_dot_class = g_strdup_printf("%s.%s", node->name, classes[i]);
-                    rsvg_lookup_apply_css_style(ctx, tag_dot_class, node->state);
-                    g_free(tag_dot_class);
-                }
-
-                /* class#id */
-                if (node->id) {
-                    char* class_hash_id = g_strdup_printf(".%s#%s", classes[i], node->id);
-                    rsvg_lookup_apply_css_style(ctx, class_hash_id, node->state);
-                    g_free(class_hash_id);
-                }
-
-                /* tag.class#id */
-                if (node->name && node->id) {
-                    char* tag_class_hash_id = g_strdup_printf("%s.%s#%s", node->name, classes[i], node->id);
-                    rsvg_lookup_apply_css_style(ctx, tag_class_hash_id, node->state);
-                    g_free(tag_class_hash_id);
-                }
-
-                g_free(dot_class);
-            }
-            g_strfreev(classes);
-        }
-    }
-
-    /* 4. id selectors */
-    if (node->id) {
-        char* hash_id = g_strdup_printf("#%s", node->id);
-        rsvg_lookup_apply_css_style(ctx, hash_id, node->state);
-
-        if (node->name) {
-            char* tag_hash_id = g_strdup_printf("%s#%s", node->name, node->id);
-            rsvg_lookup_apply_css_style(ctx, tag_hash_id, node->state);
-            g_free(tag_hash_id);
-        }
-        g_free(hash_id);
-    }
-
-    /* 5. inline style string */
-    if (node->style_attr)
-        rsvg_parse_style(ctx, node->state, node->style_attr);
+    rsvg_css_engine_apply_styles(ctx->priv->css_engine, node, node->state, node->name, node->klass, node->id, NULL);
 }
 
 static void rsvg_apply_styles_recursive(RsvgHandle* ctx, RsvgNode* node) {

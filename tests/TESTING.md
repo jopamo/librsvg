@@ -1,5 +1,5 @@
-Librsvg test suite
-==================
+Librsvg Testing Guide
+=====================
 
 Librsvg's test harness is built upon [Glib's GTest utility
 functions][gtest].  These let you define tests in the C language.
@@ -48,6 +48,12 @@ This runs the black-box tests above along with smaller unit checks.
 Results are written under `builddir/meson-logs/`.  You can also run an
 individual test binary directly from `builddir/tests/<name>` if you
 want to focus on a single area.
+
+For debugging with sanitizers (ASan/UBSan), use:
+
+```bash
+meson test -C builddir --setup=asan_ubsan
+```
 
 
 # Tests and test fixtures

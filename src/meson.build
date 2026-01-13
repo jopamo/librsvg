@@ -91,6 +91,8 @@ lib_sources = files(
   'rsvg-cairo-draw.c',
   'rsvg-cairo-render.c',
   'rsvg-cond.c',
+  'rsvg-css-engine.c',
+  'rsvg-css-engine-croco.c',
   'rsvg-css.c',
   'rsvg-defs.c',
   'rsvg-file-util.c',
@@ -121,7 +123,7 @@ lib_deps = [
   pangoft2_dep,
   cairo_dep,
   cairo_png_dep,
-  croco_dep,
+  css_dep,
   fontconfig_dep,
 ]
 

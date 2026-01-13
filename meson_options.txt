@@ -4,3 +4,4 @@ option('gtk_demo', type: 'feature', value: 'auto', description: 'Build the GTK r
 option('dev_tools', type: 'boolean', value: true, description: 'Build auxiliary developer tools (dimensions/performance)')
 option('ci', type: 'boolean', value: false, description: 'Enable stricter CI build settings')
 option('fuzzing', type: 'boolean', value: false, description: 'Build fuzzing harnesses')
+option('css_engine', type: 'combo', choices: ['libcroco', 'libcss'], value: 'libcroco', description: 'CSS parsing engine to use')

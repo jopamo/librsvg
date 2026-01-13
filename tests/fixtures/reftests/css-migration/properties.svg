@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <style>
+    .props {
+      fill: red;
+      fill-opacity: 0.5;
+      stroke: blue;
+      stroke-width: 2;
+      stroke-dasharray: 4 2;
+      stroke-opacity: 0.8;
+      opacity: 0.9;
+    }
+    .font {
+      font-family: sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      font-style: italic;
+      text-decoration: underline;
+    }
+  </style>
+  
+  <rect x="10" y="10" width="50" height="50" class="props" />
+  <text x="10" y="100" class="font">Hello CSS</text>
+</svg>

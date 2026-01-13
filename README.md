@@ -1,59 +1,60 @@
 # librsvg (C-only continuation)
 
-This repository is a continuation of the librsvg 2.40 C codebase with a focus on
-keeping GUI environments working without a hard Rust dependency. It preserves
-the public API/ABI while modernizing the C implementation, tests, and tooling.
+This repository is a modernized continuation of the librsvg 2.40 C codebase. It is designed to provide a robust, secure, and API-compatible SVG rendering library for environments where a Rust toolchain is not available or desired.
 
-## Goals
+It focuses on:
+*   **GTK4 Compatibility:** Native support for symbolic icon recoloring and dynamic stylesheets.
+*   **Modern Tooling:** A clean Meson build system, extensive CI integration, and sanitizer support.
+*   **ABI Stability:** Drop-in replacement for `librsvg-2.0` (version 2.52.0 compatible).
+*   **Safety:** Hardened XML parsing limits and extensive fuzzing/regression testing.
 
-- Keep the 2.40-era C implementation viable for C/GLib-based stacks.
-- Maintain ABI stability for the `librsvg-2.0` API surface.
-- Improve safety, limits, and test coverage without changing public behavior.
+## Build
 
-## Why C-only
+This project uses the [Meson](https://mesonbuild.com/) build system.
 
-This fork exists to keep librsvg usable in GUI environments that cannot or do
-not want to take a hard Rust dependency. Scope is limited to the 2.40 C codebase
-and its public API/ABI; the goal is compatibility and maintenance, not a full
-re-architecture or feature divergence.
+### Dependencies
 
-## Build (Meson)
+*   glib-2.0 >= 2.12.0
+*   gdk-pixbuf-2.0 >= 2.20
+*   cairo >= 1.2.0
+*   libxml-2.0 >= 2.9.0
+*   pango >= 1.38.0
+*   libcroco (bundled/integrated)
 
-Debug build:
+### Compilation
 
 ```bash
+# fast debug build
 meson setup build
 meson compile -C build
-```
 
-Release build:
-
-```bash
+# release build
 meson setup build-release --buildtype=release
 meson compile -C build-release
 ```
 
-ASan/UBSan build:
+### Options
 
-```bash
-meson setup build-asan -Db_sanitize=address,undefined -Db_lundef=false
-meson compile -C build-asan
-```
+*   `-Dgdk_pixbuf_loader=true`: Build the gdk-pixbuf loader (default: true).
+*   `-Dintrospection=enabled`: Build GObject Introspection data.
+*   `-Dgtk_demo=enabled`: Build GTK3 demo tools.
 
-## Tests
+## Testing
+
+The test suite covers API, rendering correctness, security limits, and regressions.
 
 ```bash
 meson test -C build --print-errorlogs
 ```
 
-See `tests/README.md` for reftests and fixture details.
+For advanced testing (ASan/UBSan), use the predefined setups:
 
-## Project layout (high level)
+```bash
+meson setup build-san --setup=asan_ubsan
+meson test -C build-san
+```
 
-- `src/`: core library implementation
-- `libcroco/`: bundled CSS parser used by the renderer
-- `gdk-pixbuf-loader/`: optional gdk-pixbuf loader
-- `tests/`: unit tests, security tests, and fixtures
+See `tests/TESTING.md` for detailed information on the test suite structure and adding new regression tests.
 
 ## GTK4 Compatibility and Dynamic CSS
 
@@ -67,6 +68,13 @@ The CSS support is powered by `libcroco` (as in stock 2.40) and covers standard 
 *   Selectors: `*`, `tag`, `.class`, `#id`, and combinations.
 *   Properties: Standard SVG presentation attributes (fill, stroke, etc.).
 *   **Differences from 2.48+**: This C implementation does not support the full CSS3/CSS4 feature set found in the Rust version (e.g., complex pseudo-classes, variables other than `currentColor`).
+
+## Project Layout
+
+- `src/`: Core library implementation (GObject-based).
+- `libcroco/`: Integrated CSS parser.
+- `gdk-pixbuf-loader/`: GdkPixbuf module for SVG support.
+- `tests/`: Unit tests, rendering tests (reftests), and fuzzing corpus.
 
 ## License
 

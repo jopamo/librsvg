@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <style>
+    rect { fill: red; }
+    .class1 { fill: blue; }
+    #id1 { fill: green; }
+    
+    /* Order doesn't matter for specificity in standard CSS, but checking implementation behavior */
+    .classA { fill: cyan; }
+    .classB { fill: magenta; } /* Should win over classA if both present and this is last defined? Or last in attribute? */
+  </style>
+  
+  <rect x="10" y="10" width="30" height="30" class="class1" /> <!-- blue (class > tag) -->
+  <rect x="50" y="10" width="30" height="30" class="class1" id="id1" /> <!-- green (id > class) -->
+  <rect x="90" y="10" width="30" height="30" id="id1" style="fill: yellow" /> <!-- yellow (style > id) -->
+  
+  <!-- Specificity clash check -->
+  <rect x="130" y="10" width="30" height="30" class="classA classB" /> <!-- magenta (classB defined last?) -->
+  <rect x="10" y="50" width="30" height="30" class="classB classA" /> <!-- magenta (classB defined last?) -->
+  
+  <!-- Presentation attribute -->
+  <rect x="50" y="50" width="30" height="30" fill="orange" class="class1" /> <!-- blue (class > pres attr) -->
+</svg>

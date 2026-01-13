@@ -72,6 +72,13 @@ config_conf.set('PACKAGE_TARNAME', 'librsvg')
 config_conf.set('PACKAGE_VERSION', meson.project_version())
 config_conf.set('VERSION', meson.project_version())
 
+css_engine = get_option('css_engine')
+if css_engine == 'libcss'
+  config_conf.set('HAVE_LIBCSS', 1)
+else
+  config_conf.set('HAVE_LIBCSS', 0)
+endif
+
 configure_file(
   input: 'config.h.meson',
   output: 'config.h',
@@ -79,7 +86,14 @@ configure_file(
 )
 
 config_inc = include_directories('.')
-subdir('libcroco')
+
+if css_engine == 'libcroco'
+  subdir('libcroco')
+  css_dep = croco_dep
+else
+  css_dep = dependency('libcss')
+endif
+
 src_inc = include_directories('src')
 incdir = join_paths(get_option('includedir'), 'librsvg-2.0', 'librsvg')
 

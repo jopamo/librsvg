@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <style>
+    * { stroke: black; stroke-width: 1; }
+    rect { fill: red; }
+    .blue { fill: blue; }
+    #green { fill: green; }
+    rect.orange { fill: orange; }
+    rect#purple { fill: purple; }
+  </style>
+  
+  <rect x="10" y="10" width="30" height="30" /> <!-- red (tag) -->
+  <rect x="50" y="10" width="30" height="30" class="blue" /> <!-- blue (class) -->
+  <rect x="90" y="10" width="30" height="30" id="green" /> <!-- green (id) -->
+  <rect x="130" y="10" width="30" height="30" class="orange" /> <!-- orange (tag.class) -->
+  <rect x="10" y="50" width="30" height="30" id="purple" /> <!-- purple (tag#id) -->
+  
+  <!-- Precedence checks -->
+  <rect x="50" y="50" width="30" height="30" class="blue" id="green" /> <!-- green (id wins over class) -->
+  <rect x="90" y="50" width="30" height="30" class="blue" style="fill: yellow" /> <!-- yellow (inline wins) -->
+</svg>

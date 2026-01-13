@@ -40,6 +40,7 @@
 
 #include "rsvg-private.h"
 #include "rsvg-defs.h"
+#include "rsvg-css-engine.h"
 #include "rsvg.h"
 
 enum {
@@ -75,8 +76,7 @@ static void rsvg_handle_init(RsvgHandle* self) {
     self->priv->dpi_x = rsvg_internal_dpi_x;
     self->priv->dpi_y = rsvg_internal_dpi_y;
 
-    self->priv->css_props =
-        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
+    self->priv->css_engine = rsvg_css_engine_croco_new(self);
 
     self->priv->ctxt = NULL;
     self->priv->currentnode = NULL;
@@ -101,7 +101,7 @@ static void rsvg_handle_dispose(GObject* instance) {
 
     rsvg_defs_free(self->priv->defs);
     g_hash_table_destroy(self->priv->entities);
-    g_hash_table_destroy(self->priv->css_props);
+    rsvg_css_engine_free(self->priv->css_engine);
 
     self->priv->ctxt = rsvg_free_xml_parser_and_doc(self->priv->ctxt);
 

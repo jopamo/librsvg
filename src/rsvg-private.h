@@ -46,6 +46,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(cairo_pattern_t, cairo_pattern_destroy)
 #include <float.h>
 #endif
 
+typedef struct _RsvgCssEngine RsvgCssEngine;
+
 G_BEGIN_DECLS
 
 typedef struct RsvgSaxHandler RsvgSaxHandler;
@@ -162,7 +164,7 @@ struct RsvgHandlePrivate {
        file is converted into at the end */
     RsvgNode* treebase;
 
-    GHashTable* css_props;
+    RsvgCssEngine* css_engine;
 
     /* not a handler stack. each nested handler keeps
      * track of its parent

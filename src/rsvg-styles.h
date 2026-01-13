@@ -213,7 +213,14 @@ void rsvg_parse_style_attrs(RsvgHandle* ctx,
                             RsvgPropertyBag* atts);
 
 G_GNUC_INTERNAL
-gboolean rsvg_lookup_apply_css_style(RsvgHandle* ctx, const char* target, RsvgState* state);
+void rsvg_parse_style_pair(RsvgHandle* ctx,
+                           RsvgState* state,
+                           const gchar* name,
+                           const gchar* value,
+                           gboolean important);
+
+G_GNUC_INTERNAL
+void rsvg_parse_transform_attr(RsvgHandle* ctx, RsvgState* state, const char* str);
 
 G_GNUC_INTERNAL
 gdouble rsvg_viewport_percentage(gdouble width, gdouble height);

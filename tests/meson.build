@@ -19,6 +19,7 @@ test_programs = {
   'xss-checks': ['xss_checks.c'],
   'api': ['api.c'],
   'restyle': ['restyle.c'],
+  'style-dump': ['style-dump.c'],
 }
 
 if get_option('ci')
