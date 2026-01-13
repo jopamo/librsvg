@@ -283,8 +283,19 @@ static void rsvg_standard_element_start(RsvgHandle* ctx, const char* name, RsvgP
 
     if (newnode) {
         g_assert(RSVG_NODE_TYPE(newnode) != RSVG_NODE_TYPE_INVALID);
-        newnode->name = (char*)name; /* libxml will keep this while parsing */
+        newnode->name = g_strdup(name);
         newnode->parent = ctx->priv->currentnode;
+
+        if (atts) {
+            const char* v;
+            if ((v = rsvg_property_bag_lookup(atts, "id")))
+                newnode->id = g_strdup(v);
+            if ((v = rsvg_property_bag_lookup(atts, "class")))
+                newnode->klass = g_strdup(v);
+            if ((v = rsvg_property_bag_lookup(atts, "style")))
+                newnode->style_attr = g_strdup(v);
+        }
+
         rsvg_node_set_atts(newnode, ctx, atts);
         rsvg_defs_register_memory(ctx->priv->defs, newnode);
         if (ctx->priv->currentnode) {
@@ -939,6 +950,66 @@ void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri) {
     rsvg_handle_set_base_gfile(handle, file);
 }
 
+static void rsvg_apply_styles_to_node(RsvgHandle* ctx, RsvgNode* node) {
+    rsvg_lookup_apply_css_style(ctx, "*", node->state);
+
+    if (node->name)
+        rsvg_lookup_apply_css_style(ctx, node->name, node->state);
+
+    if (node->klass) {
+        char** classes = g_strsplit(node->klass, " ", -1);
+        int i;
+        for (i = 0; classes[i]; i++) {
+            if (*classes[i]) {
+                char* target;
+
+                target = g_strdup_printf(".%s", classes[i]);
+                rsvg_lookup_apply_css_style(ctx, target, node->state);
+                g_free(target);
+
+                if (node->name) {
+                    target = g_strdup_printf("%s.%s", node->name, classes[i]);
+                    rsvg_lookup_apply_css_style(ctx, target, node->state);
+                    g_free(target);
+                }
+            }
+        }
+        g_strfreev(classes);
+    }
+
+    if (node->id) {
+        char* target;
+        target = g_strdup_printf("#%s", node->id);
+        rsvg_lookup_apply_css_style(ctx, target, node->state);
+        g_free(target);
+
+        if (node->name) {
+            target = g_strdup_printf("%s#%s", node->name, node->id);
+            rsvg_lookup_apply_css_style(ctx, target, node->state);
+            g_free(target);
+        }
+    }
+
+    if (node->style_attr)
+        rsvg_parse_style(ctx, node->state, node->style_attr);
+}
+
+static void rsvg_apply_styles_recursive(RsvgHandle* ctx, RsvgNode* node) {
+    guint i;
+
+    if (!node)
+        return;
+
+    rsvg_apply_styles_to_node(ctx, node);
+
+    if (node->children) {
+        for (i = 0; i < node->children->len; i++) {
+            RsvgNode* child = g_ptr_array_index(node->children, i);
+            rsvg_apply_styles_recursive(ctx, child);
+        }
+    }
+}
+
 /**
  * rsvg_handle_set_stylesheet:
  * @handle: A #RsvgHandle
@@ -958,6 +1029,9 @@ gboolean rsvg_handle_set_stylesheet(RsvgHandle* handle, const guint8* css, gsize
     g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
     rsvg_parse_cssbuffer(handle, (const char*)css, (size_t)css_len);
+
+    if (handle->priv->treebase)
+        rsvg_apply_styles_recursive(handle, handle->priv->treebase);
 
     return TRUE;
 }

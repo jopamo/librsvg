@@ -1195,7 +1195,7 @@ static void apply_style(const gchar* key, StyleValueData* value, gpointer user_d
     rsvg_parse_style_pair(data->ctx, data->state, key, value->value, value->important);
 }
 
-static gboolean rsvg_lookup_apply_css_style(RsvgHandle* ctx, const char* target, RsvgState* state) {
+gboolean rsvg_lookup_apply_css_style(RsvgHandle* ctx, const char* target, RsvgState* state) {
     GHashTable* styles;
 
     styles = g_hash_table_lookup(ctx->priv->css_props, target);

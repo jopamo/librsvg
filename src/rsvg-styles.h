@@ -213,6 +213,9 @@ void rsvg_parse_style_attrs(RsvgHandle* ctx,
                             RsvgPropertyBag* atts);
 
 G_GNUC_INTERNAL
+gboolean rsvg_lookup_apply_css_style(RsvgHandle* ctx, const char* target, RsvgState* state);
+
+G_GNUC_INTERNAL
 gdouble rsvg_viewport_percentage(gdouble width, gdouble height);
 G_GNUC_INTERNAL
 gdouble rsvg_dpi_percentage(RsvgHandle* ctx);

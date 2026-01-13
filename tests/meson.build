@@ -18,6 +18,7 @@ test_programs = {
   'vulnerability-check': ['vulnerability_check.c'],
   'xss-checks': ['xss_checks.c'],
   'api': ['api.c'],
+  'restyle': ['restyle.c'],
 }
 
 if get_option('ci')
