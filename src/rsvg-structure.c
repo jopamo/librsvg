@@ -96,6 +96,7 @@ void _rsvg_node_init(RsvgNode* self, RsvgNodeType type) {
     self->id = NULL;
     self->klass = NULL;
     self->style_attr = NULL;
+    self->atts = NULL;
     self->has_style_info = 0;
     rsvg_state_init(self->state);
     self->free = _rsvg_node_free;
@@ -118,6 +119,8 @@ void _rsvg_node_finalize(RsvgNode* self) {
     g_free(self->id);
     g_free(self->klass);
     g_free(self->style_attr);
+    if (self->atts)
+        rsvg_property_bag_free(self->atts);
 }
 
 void _rsvg_node_free(RsvgNode* self) {
@@ -339,29 +342,22 @@ static void rsvg_node_svg_set_atts(RsvgNode* self, RsvgHandle* ctx, RsvgProperty
          * style element is not loaded yet here, so we need to store those attribues
          * to be applied later.
          */
-        svg->atts = rsvg_property_bag_dup(atts);
+        svg->super.atts = rsvg_property_bag_dup(atts);
     }
 }
 
 void _rsvg_node_svg_apply_atts(RsvgNodeSvg* self, RsvgHandle* ctx) {
     const char *id = NULL, *klazz = NULL, *value;
-    if (self->atts && rsvg_property_bag_size(self->atts)) {
-        if ((value = rsvg_property_bag_lookup(self->atts, "class")))
+    if (((RsvgNode*)self)->atts && rsvg_property_bag_size(((RsvgNode*)self)->atts)) {
+        if ((value = rsvg_property_bag_lookup(((RsvgNode*)self)->atts, "class")))
             klazz = value;
-        if ((value = rsvg_property_bag_lookup(self->atts, "id")))
+        if ((value = rsvg_property_bag_lookup(((RsvgNode*)self)->atts, "id")))
             id = value;
-        rsvg_parse_style_attrs(ctx, ((RsvgNode*)self)->state, "svg", klazz, id, self->atts);
+        rsvg_parse_style_attrs(ctx, ((RsvgNode*)self)->state, "svg", klazz, id, ((RsvgNode*)self)->atts);
     }
 }
 
 static void _rsvg_svg_free(RsvgNode* self) {
-    RsvgNodeSvg* svg = (RsvgNodeSvg*)self;
-
-    if (svg->atts) {
-        rsvg_property_bag_free(svg->atts);
-        svg->atts = NULL;
-    }
-
     _rsvg_node_free(self);
 }
 
@@ -378,7 +374,6 @@ RsvgNode* rsvg_new_svg(void) {
     svg->super.draw = rsvg_node_svg_draw;
     svg->super.free = _rsvg_svg_free;
     svg->super.set_atts = rsvg_node_svg_set_atts;
-    svg->atts = NULL;
     return &svg->super;
 }
 

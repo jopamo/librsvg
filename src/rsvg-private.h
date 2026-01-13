@@ -323,6 +323,7 @@ struct _RsvgNode {
     char* id;
     char* klass;
     char* style_attr;
+    RsvgPropertyBag* atts;
     guint has_style_info : 1;
     void (*free)(RsvgNode* self);
     void (*draw)(RsvgNode* self, RsvgDrawingCtx* ctx, int dominate);
