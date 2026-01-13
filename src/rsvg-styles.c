@@ -209,7 +209,17 @@ void rsvg_state_clone(RsvgState* dst, const RsvgState* src) {
     rsvg_paint_server_ref(dst->fill);
     rsvg_paint_server_ref(dst->stroke);
 
-    dst->styles = g_hash_table_ref(src->styles);
+    dst->styles = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)rsvg_style_value_data_free);
+    if (src->styles) {
+        GHashTableIter iter;
+        gpointer key, value;
+        g_hash_table_iter_init(&iter, src->styles);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            StyleValueData* val = (StyleValueData*)value;
+            g_hash_table_insert(dst->styles, g_strdup((char*)key),
+                                rsvg_style_value_data_new(val->value, val->important));
+        }
+    }
 
     if (src->dash.n_dash > 0) {
         dst->dash.dash = g_new(gdouble, src->dash.n_dash);

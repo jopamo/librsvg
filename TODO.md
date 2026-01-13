@@ -35,22 +35,22 @@ You must convert it into a **style-addressable DOM node**.
 
 **Add fields:**
 
-* [ ] `char *name`
+* [x] `char *name`
   owned copy of element tag
 
-* [ ] `char *id`
+* [x] `char *id`
   owned copy of `id` attribute
 
-* [ ] `char *klass`
+* [x] `char *klass`
   owned raw class string (`"warning important foo"`)
 
-* [ ] `char *style_attr`
+* [x] `char *style_attr`
   owned raw `style="..."`
 
-* [ ] `RsvgState *base_state` (optional but strongly recommended)
+* [x] `RsvgState *base_state` (optional but strongly recommended)
   snapshot of state **after parse-time attributes & inline style**, before CSS injection
 
-* [ ] `guint has_style_info : 1`
+* [x] `guint has_style_info : 1`
 
 **Why this exists**
 
@@ -60,10 +60,10 @@ Without this, you cannot re-evaluate CSS selectors because the parse-time proper
 
 ### 1.2 Ownership fixes
 
-* [ ] Change `rsvg_standard_element_start()` to use `g_strdup(name)`
+* [x] Change `rsvg_standard_element_start()` to use `g_strdup(name)`
   do not store libxml’s transient string
 
-* [ ] Update `_rsvg_node_finalize()` to free:
+* [x] Update `_rsvg_node_finalize()` to free:
 
   * name
   * id
@@ -79,7 +79,7 @@ Without this, you cannot re-evaluate CSS selectors because the parse-time proper
 
 In `rsvg_standard_element_start()`:
 
-* [ ] Call a helper `rsvg_node_save_style_info(node, atts)` that extracts:
+* [x] Call a helper `rsvg_node_save_style_info(node, atts)` that extracts:
 
   * `id`
   * `class`
@@ -95,8 +95,8 @@ Inline styles are parsed **after CSS** in `rsvg_parse_style_attrs()`.
 
 If you don’t store `style_attr`, then when you re-apply CSS you will break precedence.
 
-* [ ] Capture `style` attribute verbatim
-* [ ] Re-apply it after CSS selectors during restyle
+* [x] Capture `style` attribute verbatim
+* [x] Re-apply it after CSS selectors during restyle
 
 ---
 
@@ -115,9 +115,9 @@ void rsvg_handle_set_stylesheet(RsvgHandle *handle,
 
 Responsibilities:
 
-* Parse CSS into `handle->priv->css_props`
-* Trigger a full tree restyle
-* Mark rendering caches dirty if needed
+* [x] Parse CSS into `handle->priv->css_props`
+* [x] Trigger a full tree restyle
+* [ ] Mark rendering caches dirty if needed
 
 This matches ≥2.48 behavior conceptually.
 
@@ -133,10 +133,10 @@ void rsvg_apply_styles_recursive(RsvgHandle *ctx, RsvgNode *node)
 
 Must:
 
-1. Reset node state if base_state exists
-2. Re-apply CSS selectors
-3. Re-apply inline style
-4. Recurse into children
+1. [x] Reset node state if base_state exists
+2. [x] Re-apply CSS selectors
+3. [x] Re-apply inline style
+4. [x] Recurse into children
 
 ---
 
@@ -146,13 +146,13 @@ Re-implement the logic from `rsvg_parse_style_attrs()`:
 
 Apply selectors in this exact order:
 
-1. `*`
-2. `tag`
-3. `.class`
-4. `tag.class`
-5. `#id`
-6. `tag#id`
-7. inline style
+1. [x] `*`
+2. [x] `tag`
+3. [x] `.class`
+4. [x] `tag.class`
+5. [x] `#id`
+6. [x] `tag#id`
+7. [x] inline style
 
 You must split `class="a b c"` into tokens and apply each.
 
@@ -178,8 +178,8 @@ Works for GTK icons because only color changes.
 
 #### Correct
 
-* [ ] Snapshot `base_state` after parse
-* [ ] On restyle:
+* [x] Snapshot `base_state` after parse
+* [x] On restyle:
 
   * `state = clone(base_state)`
   * apply CSS
@@ -199,7 +199,7 @@ GTK symbolic icons depend on:
 
 Tasks:
 
-* [ ] Verify that color propagation recomputes paints
+* [x] Verify that color propagation recomputes paints
 * [ ] Ensure gradients and patterns referencing `currentColor` update
 * [ ] Ensure cached cairo surfaces get invalidated
 
@@ -214,9 +214,9 @@ GTK4 expects:
 
 Tasks:
 
-* [ ] Export the new symbol
-* [ ] Provide pkg-config that advertises it
-* [ ] Keep ABI compatible with librsvg-2.0
+* [x] Export the new symbol
+* [x] Provide pkg-config that advertises it
+* [x] Keep ABI compatible with librsvg-2.0
 
 ---
 
@@ -226,9 +226,9 @@ GTK4 still uses gdk-pixbuf for many SVG loads.
 
 Tasks:
 
-* [ ] Make the pixbuf loader call your fork
+* [x] Make the pixbuf loader call your fork
 * [ ] Ensure stylesheet injection flows into your new API
-* [ ] Ensure loader cache works or is bypassed
+* [x] Ensure loader cache works or is bypassed
 
 ---
 
@@ -250,17 +250,17 @@ Then inject CSS:
 
 Validate:
 
-* Before CSS → default color
-* After CSS → red
+* [x] Before CSS → default color
+* [x] After CSS → red
 
 ---
 
 ### 7.2 Regression tests
 
-* Multiple classes
-* id selectors
-* tag + class
-* inline style overrides CSS
+* [x] Multiple classes
+* [x] id selectors
+* [x] tag + class
+* [x] inline style overrides CSS
 
 Compare output vs ≥2.48 librsvg or browser.
 
@@ -270,10 +270,10 @@ Compare output vs ≥2.48 librsvg or browser.
 
 Write:
 
-* How dynamic CSS works in your fork
-* What subset of CSS is supported
-* How it differs from stock 2.40
-* How it differs from ≥2.48
+* [x] How dynamic CSS works in your fork
+* [ ] What subset of CSS is supported
+* [x] How it differs from stock 2.40
+* [x] How it differs from ≥2.48
 
 This matters for packagers and GTK maintainers.
 

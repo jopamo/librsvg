@@ -55,6 +55,12 @@ See `tests/README.md` for reftests and fixture details.
 - `gdk-pixbuf-loader/`: optional gdk-pixbuf loader
 - `tests/`: unit tests, security tests, and fixtures
 
+## GTK4 Compatibility and Dynamic CSS
+
+This fork includes a back-ported implementation of `rsvg_handle_set_stylesheet` (introduced in librsvg 2.48) to support GTK4 symbolic icon recoloring.
+
+Unlike the original 2.40.x codebase which resolved styles only during parsing, this version captures node metadata (tag names, classes, IDs) and supports a full tree restyle when a new stylesheet is injected. This ensures that `currentColor` and class-based symbolic styling work as expected in modern GTK4 environments.
+
 ## License
 
 See `COPYING`.

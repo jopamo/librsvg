@@ -313,6 +313,7 @@ typedef enum {
 
 struct _RsvgNode {
     RsvgState* state;
+    RsvgState* base_state;
     RsvgNode* parent;
     GPtrArray* children;
     RsvgNodeType type;
@@ -320,6 +321,7 @@ struct _RsvgNode {
     char* id;
     char* klass;
     char* style_attr;
+    guint has_style_info : 1;
     void (*free)(RsvgNode* self);
     void (*draw)(RsvgNode* self, RsvgDrawingCtx* ctx, int dominate);
     void (*set_atts)(RsvgNode* self, RsvgHandle* ctx, RsvgPropertyBag*);

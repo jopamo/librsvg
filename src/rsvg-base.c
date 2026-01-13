@@ -294,6 +294,7 @@ static void rsvg_standard_element_start(RsvgHandle* ctx, const char* name, RsvgP
                 newnode->klass = g_strdup(v);
             if ((v = rsvg_property_bag_lookup(atts, "style")))
                 newnode->style_attr = g_strdup(v);
+            newnode->has_style_info = 1;
         }
 
         rsvg_node_set_atts(newnode, ctx, atts);
@@ -950,46 +951,95 @@ void rsvg_handle_set_base_uri(RsvgHandle* handle, const char* base_uri) {
     rsvg_handle_set_base_gfile(handle, file);
 }
 
+static void rsvg_node_snapshot_base_state_recursive(RsvgNode* node) {
+    guint i;
+
+    if (!node)
+        return;
+
+    if (!node->base_state) {
+        node->base_state = g_new(RsvgState, 1);
+        rsvg_state_init(node->base_state);
+        rsvg_state_clone(node->base_state, node->state);
+    }
+
+    if (node->children) {
+        for (i = 0; i < node->children->len; i++) {
+            RsvgNode* child = g_ptr_array_index(node->children, i);
+            rsvg_node_snapshot_base_state_recursive(child);
+        }
+    }
+}
+
 static void rsvg_apply_styles_to_node(RsvgHandle* ctx, RsvgNode* node) {
+    if (!node->state)
+        return;
+
+    if (node->base_state) {
+        rsvg_state_clone(node->state, node->base_state);
+    }
+
+    /* 1. universal selector */
     rsvg_lookup_apply_css_style(ctx, "*", node->state);
 
+    /* 2. tag selector */
     if (node->name)
         rsvg_lookup_apply_css_style(ctx, node->name, node->state);
 
+    /* 3. class selectors */
     if (node->klass) {
         char** classes = g_strsplit(node->klass, " ", -1);
-        int i;
-        for (i = 0; classes[i]; i++) {
-            if (*classes[i]) {
-                char* target;
+        if (classes) {
+            int i;
+            for (i = 0; classes[i]; i++) {
+                if (!classes[i][0])
+                    continue;
+                char* dot_class = g_strdup_printf(".%s", classes[i]);
 
-                target = g_strdup_printf(".%s", classes[i]);
-                rsvg_lookup_apply_css_style(ctx, target, node->state);
-                g_free(target);
+                /* class */
+                rsvg_lookup_apply_css_style(ctx, dot_class, node->state);
 
+                /* tag.class */
                 if (node->name) {
-                    target = g_strdup_printf("%s.%s", node->name, classes[i]);
-                    rsvg_lookup_apply_css_style(ctx, target, node->state);
-                    g_free(target);
+                    char* tag_dot_class = g_strdup_printf("%s.%s", node->name, classes[i]);
+                    rsvg_lookup_apply_css_style(ctx, tag_dot_class, node->state);
+                    g_free(tag_dot_class);
                 }
+
+                /* class#id */
+                if (node->id) {
+                    char* class_hash_id = g_strdup_printf(".%s#%s", classes[i], node->id);
+                    rsvg_lookup_apply_css_style(ctx, class_hash_id, node->state);
+                    g_free(class_hash_id);
+                }
+
+                /* tag.class#id */
+                if (node->name && node->id) {
+                    char* tag_class_hash_id = g_strdup_printf("%s.%s#%s", node->name, classes[i], node->id);
+                    rsvg_lookup_apply_css_style(ctx, tag_class_hash_id, node->state);
+                    g_free(tag_class_hash_id);
+                }
+
+                g_free(dot_class);
             }
+            g_strfreev(classes);
         }
-        g_strfreev(classes);
     }
 
+    /* 4. id selectors */
     if (node->id) {
-        char* target;
-        target = g_strdup_printf("#%s", node->id);
-        rsvg_lookup_apply_css_style(ctx, target, node->state);
-        g_free(target);
+        char* hash_id = g_strdup_printf("#%s", node->id);
+        rsvg_lookup_apply_css_style(ctx, hash_id, node->state);
 
         if (node->name) {
-            target = g_strdup_printf("%s#%s", node->name, node->id);
-            rsvg_lookup_apply_css_style(ctx, target, node->state);
-            g_free(target);
+            char* tag_hash_id = g_strdup_printf("%s#%s", node->name, node->id);
+            rsvg_lookup_apply_css_style(ctx, tag_hash_id, node->state);
+            g_free(tag_hash_id);
         }
+        g_free(hash_id);
     }
 
+    /* 5. inline style string */
     if (node->style_attr)
         rsvg_parse_style(ctx, node->state, node->style_attr);
 }
@@ -1030,8 +1080,10 @@ gboolean rsvg_handle_set_stylesheet(RsvgHandle* handle, const guint8* css, gsize
 
     rsvg_parse_cssbuffer(handle, (const char*)css, (size_t)css_len);
 
-    if (handle->priv->treebase)
+    if (handle->priv->treebase) {
+        rsvg_node_snapshot_base_state_recursive(handle->priv->treebase);
         rsvg_apply_styles_recursive(handle, handle->priv->treebase);
+    }
 
     return TRUE;
 }

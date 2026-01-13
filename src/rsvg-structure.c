@@ -91,10 +91,12 @@ void _rsvg_node_init(RsvgNode* self, RsvgNodeType type) {
     self->parent = NULL;
     self->children = g_ptr_array_new();
     self->state = g_new(RsvgState, 1);
+    self->base_state = NULL;
     self->name = NULL;
     self->id = NULL;
     self->klass = NULL;
     self->style_attr = NULL;
+    self->has_style_info = 0;
     rsvg_state_init(self->state);
     self->free = _rsvg_node_free;
     self->draw = _rsvg_node_draw_nothing;
@@ -105,6 +107,10 @@ void _rsvg_node_finalize(RsvgNode* self) {
     if (self->state != NULL) {
         rsvg_state_finalize(self->state);
         g_free(self->state);
+    }
+    if (self->base_state != NULL) {
+        rsvg_state_finalize(self->base_state);
+        g_free(self->base_state);
     }
     if (self->children != NULL)
         g_ptr_array_free(self->children, TRUE);
