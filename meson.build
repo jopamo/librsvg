@@ -1,7 +1,7 @@
 project(
   'librsvg',
   'c',
-  version: '2.40.21',
+  version: '2.52.0',
   license: 'LGPL-2.0+',
   default_options: [
     'warning_level=2',
