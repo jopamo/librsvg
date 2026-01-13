@@ -92,6 +92,20 @@ foreach name, sources : test_programs
   test(name, exe, env: test_env, timeout: 120)
 endforeach
 
+if gtk4_dep.found()
+  test_gtk4_exe = executable(
+    'test-gtk4',
+    ['test-gtk4.c'] + common_test_sources,
+    include_directories: test_includes,
+    dependencies: [
+      librsvg_dep,
+      gtk4_dep,
+    ],
+    install: false,
+  )
+  test('test-gtk4', test_gtk4_exe, env: test_env_common, timeout: 120)
+endif
+
 if get_option('gdk_pixbuf_loader') and get_option('dev_tools')
   rsvg_loader_exe = executable(
     'rsvg-loader-test-bin',

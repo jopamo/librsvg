@@ -44,6 +44,7 @@ cairo_png_dep = dependency('cairo-png', version: '>=1.2.0')
 
 gtk_feature = get_option('gtk_demo')
 gtk_dep = dependency('gtk+-3.0', version: '>=3.10.0', required: gtk_feature)
+gtk4_dep = dependency('gtk4', version: '>=4.0.0', required: false)
 
 introspection_feature = get_option('introspection')
 gi_dep = dependency(
