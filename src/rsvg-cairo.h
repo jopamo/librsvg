@@ -39,6 +39,16 @@ extern "C" {
 gboolean rsvg_handle_render_cairo(RsvgHandle* handle, cairo_t* cr);
 gboolean rsvg_handle_render_cairo_sub(RsvgHandle* handle, cairo_t* cr, const char* id);
 gboolean rsvg_handle_render_document(RsvgHandle* handle, cairo_t* cr, const RsvgRectangle* viewport, GError** error);
+gboolean rsvg_handle_render_layer(RsvgHandle* handle,
+                                  cairo_t* cr,
+                                  const char* id,
+                                  const RsvgRectangle* viewport,
+                                  GError** error);
+gboolean rsvg_handle_render_element(RsvgHandle* handle,
+                                    cairo_t* cr,
+                                    const char* id,
+                                    const RsvgRectangle* element_viewport,
+                                    GError** error);
 
 #ifdef __cplusplus
 }

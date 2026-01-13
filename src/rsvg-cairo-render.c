@@ -330,8 +330,282 @@ gboolean rsvg_handle_render_document(RsvgHandle* handle, cairo_t* cr, const Rsvg
 
     cairo_restore(cr);
 
+    return retval;
+}
+
+gboolean rsvg_handle_render_layer(RsvgHandle* handle,
+                                  cairo_t* cr,
+                                  const char* id,
+                                  const RsvgRectangle* viewport,
+                                  GError** error) {
+    RsvgDimensionData dimensions;
+    gdouble intrinsic_width = 0.0;
+    gdouble intrinsic_height = 0.0;
+    gboolean retval;
+
+    g_return_val_if_fail(handle != NULL, FALSE);
+    g_return_val_if_fail(cr != NULL, FALSE);
+
+    if (!viewport) {
+        retval = rsvg_handle_render_cairo_sub(handle, cr, id);
+        if (!retval && error && *error == NULL)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Rendering failed");
+        return retval;
+    }
+
+    if (!rsvg_handle_get_intrinsic_size_in_pixels(handle, &intrinsic_width, &intrinsic_height)) {
+        rsvg_handle_get_dimensions(handle, &dimensions);
+        intrinsic_width = dimensions.width;
+        intrinsic_height = dimensions.height;
+    }
+
+    if (intrinsic_width == 0.0 || intrinsic_height == 0.0) {
+        if (error && *error == NULL)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "SVG has invalid intrinsic size");
+        return FALSE;
+    }
+
+    cairo_save(cr);
+    cairo_translate(cr, viewport->x, viewport->y);
+    cairo_scale(cr, viewport->width / intrinsic_width, viewport->height / intrinsic_height);
+
+    retval = rsvg_handle_render_cairo_sub(handle, cr, id);
+
+    cairo_restore(cr);
+
     if (!retval && error && *error == NULL)
         g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Rendering failed");
+
+    return retval;
+}
+
+gboolean rsvg_handle_render_element(RsvgHandle* handle,
+                                    cairo_t* cr,
+                                    const char* id,
+                                    const RsvgRectangle* element_viewport,
+                                    GError** error) {
+    RsvgDrawingCtx* draw;
+    RsvgNode* drawsub = NULL;
+    gboolean retval = FALSE;
+    cairo_matrix_t my_affine, inv_parent, parent_aff;
+
+    g_return_val_if_fail(handle != NULL, FALSE);
+    g_return_val_if_fail(cr != NULL, FALSE);
+
+    if (handle->priv->state != RSVG_HANDLE_STATE_CLOSED_OK)
+        return FALSE;
+
+    if (id && *id)
+        drawsub = rsvg_defs_lookup(handle->priv->defs, id);
+
+    if (drawsub == NULL) {
+        if (error)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Element not found");
+        return FALSE;
+    }
+
+    draw = rsvg_cairo_new_drawing_ctx(cr, handle);
+    if (!draw)
+        return FALSE;
+
+    /* Calculate the transform to isolate the element */
+    my_affine = drawsub->state->affine;
+    parent_aff = drawsub->state->personal_affine;
+    if (cairo_matrix_invert(&parent_aff) != CAIRO_STATUS_SUCCESS) {
+        cairo_matrix_init_identity(&parent_aff);
+    }
+    cairo_matrix_multiply(&inv_parent, &parent_aff, &my_affine);
+    if (cairo_matrix_invert(&inv_parent) != CAIRO_STATUS_SUCCESS) {
+        cairo_matrix_init_identity(&inv_parent);
+    }
+
+    cairo_save(cr);
+    if (element_viewport) {
+        cairo_translate(cr, element_viewport->x, element_viewport->y);
+    }
+
+    cairo_transform(cr, &inv_parent);
+
+    RsvgNode* p = drawsub->parent;
+    while (p != NULL) {
+        draw->drawsub_stack = g_slist_prepend(draw->drawsub_stack, p);
+        p = p->parent;
+    }
+    draw->drawsub_stack = g_slist_prepend(draw->drawsub_stack, drawsub);
+
+    rsvg_state_push(draw);
+    rsvg_node_draw(drawsub, draw, 0);
+
+    if (rsvg_drawing_ctx_limits_exceeded(draw))
+        retval = FALSE;
+    else
+        retval = TRUE;
+
+    cairo_restore(cr);
+    rsvg_state_pop(draw);
+    rsvg_drawing_ctx_free(draw);
+
+    return retval;
+}
+
+gboolean rsvg_handle_get_geometry_for_layer(RsvgHandle* handle,
+                                            const char* id,
+                                            const RsvgRectangle* viewport,
+                                            RsvgRectangle* out_ink_rect,
+                                            RsvgRectangle* out_logical_rect,
+                                            GError** error) {
+    cairo_surface_t* surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t* cr = cairo_create(surf);
+    RsvgDrawingCtx* draw;
+    RsvgNode* drawsub = NULL;
+    gboolean retval = FALSE;
+    RsvgCairoRender* render;
+
+    if (id && *id)
+        drawsub = rsvg_defs_lookup(handle->priv->defs, id);
+    else
+        drawsub = (RsvgNode*)handle->priv->treebase;
+
+    if (!drawsub) {
+        if (error)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Element not found");
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+        return FALSE;
+    }
+
+    if (viewport) {
+        RsvgDimensionData dimensions;
+        gdouble i_w = 0, i_h = 0;
+        if (!rsvg_handle_get_intrinsic_size_in_pixels(handle, &i_w, &i_h)) {
+            rsvg_handle_get_dimensions(handle, &dimensions);
+            i_w = dimensions.width;
+            i_h = dimensions.height;
+        }
+        if (i_w > 0 && i_h > 0) {
+            cairo_translate(cr, viewport->x, viewport->y);
+            cairo_scale(cr, viewport->width / i_w, viewport->height / i_h);
+        }
+    }
+
+    draw = rsvg_cairo_new_drawing_ctx(cr, handle);
+    if (!draw) {
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+        return FALSE;
+    }
+
+    if (id && *id) {
+        RsvgNode* p = drawsub->parent;
+        GSList* stack_head = NULL;
+        while (p) {
+            stack_head = g_slist_prepend(stack_head, p);
+            p = p->parent;
+        }
+        draw->drawsub_stack = stack_head;
+    }
+
+    rsvg_state_push(draw);
+    rsvg_node_draw(drawsub, draw, 0);
+
+    render = RSVG_CAIRO_RENDER(draw->render);
+
+    if (out_ink_rect) {
+        out_ink_rect->x = render->bbox.rect.x;
+        out_ink_rect->y = render->bbox.rect.y;
+        out_ink_rect->width = render->bbox.rect.width;
+        out_ink_rect->height = render->bbox.rect.height;
+    }
+    if (out_logical_rect) {
+        out_logical_rect->x = render->bbox.rect.x;
+        out_logical_rect->y = render->bbox.rect.y;
+        out_logical_rect->width = render->bbox.rect.width;
+        out_logical_rect->height = render->bbox.rect.height;
+    }
+
+    retval = !rsvg_drawing_ctx_limits_exceeded(draw);
+
+    rsvg_state_pop(draw);
+    rsvg_drawing_ctx_free(draw);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
+
+    return retval;
+}
+
+gboolean rsvg_handle_get_geometry_for_element(RsvgHandle* handle,
+                                              const char* id,
+                                              RsvgRectangle* out_ink_rect,
+                                              RsvgRectangle* out_logical_rect,
+                                              GError** error) {
+    cairo_surface_t* surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t* cr = cairo_create(surf);
+    RsvgDrawingCtx* draw;
+    RsvgNode* drawsub = NULL;
+    gboolean retval = FALSE;
+    cairo_matrix_t my_affine, inv_parent, parent_aff;
+    RsvgCairoRender* render;
+
+    if (id && *id)
+        drawsub = rsvg_defs_lookup(handle->priv->defs, id);
+
+    if (!drawsub) {
+        if (error)
+            g_set_error_literal(error, rsvg_error_quark(), RSVG_ERROR_FAILED, "Element not found");
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+        return FALSE;
+    }
+
+    draw = rsvg_cairo_new_drawing_ctx(cr, handle);
+    if (!draw) {
+        cairo_destroy(cr);
+        cairo_surface_destroy(surf);
+        return FALSE;
+    }
+
+    my_affine = drawsub->state->affine;
+    parent_aff = drawsub->state->personal_affine;
+    if (cairo_matrix_invert(&parent_aff) != CAIRO_STATUS_SUCCESS)
+        cairo_matrix_init_identity(&parent_aff);
+    cairo_matrix_multiply(&inv_parent, &parent_aff, &my_affine);
+    if (cairo_matrix_invert(&inv_parent) != CAIRO_STATUS_SUCCESS)
+        cairo_matrix_init_identity(&inv_parent);
+
+    cairo_transform(cr, &inv_parent);
+
+    RsvgNode* p = drawsub->parent;
+    GSList* stack = NULL;
+    while (p) {
+        stack = g_slist_prepend(stack, p);
+        p = p->parent;
+    }
+    draw->drawsub_stack = stack;
+
+    rsvg_state_push(draw);
+    rsvg_node_draw(drawsub, draw, 0);
+
+    render = RSVG_CAIRO_RENDER(draw->render);
+
+    if (out_ink_rect) {
+        out_ink_rect->x = render->bbox.rect.x;
+        out_ink_rect->y = render->bbox.rect.y;
+        out_ink_rect->width = render->bbox.rect.width;
+        out_ink_rect->height = render->bbox.rect.height;
+    }
+    if (out_logical_rect) {
+        out_logical_rect->x = render->bbox.rect.x;
+        out_logical_rect->y = render->bbox.rect.y;
+        out_logical_rect->width = render->bbox.rect.width;
+        out_logical_rect->height = render->bbox.rect.height;
+    }
+
+    retval = !rsvg_drawing_ctx_limits_exceeded(draw);
+
+    rsvg_state_pop(draw);
+    rsvg_drawing_ctx_free(draw);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
 
     return retval;
 }

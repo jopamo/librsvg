@@ -201,6 +201,19 @@ void rsvg_handle_get_dimensions(RsvgHandle* handle, RsvgDimensionData* dimension
 gboolean rsvg_handle_get_dimensions_sub(RsvgHandle* handle, RsvgDimensionData* dimension_data, const char* id);
 gboolean rsvg_handle_get_position_sub(RsvgHandle* handle, RsvgPositionData* position_data, const char* id);
 
+gboolean rsvg_handle_get_geometry_for_layer(RsvgHandle* handle,
+                                            const char* id,
+                                            const RsvgRectangle* viewport,
+                                            RsvgRectangle* out_ink_rect,
+                                            RsvgRectangle* out_logical_rect,
+                                            GError** error);
+
+gboolean rsvg_handle_get_geometry_for_element(RsvgHandle* handle,
+                                              const char* id,
+                                              RsvgRectangle* out_ink_rect,
+                                              RsvgRectangle* out_logical_rect,
+                                              GError** error);
+
 gboolean rsvg_handle_get_intrinsic_size_in_pixels(RsvgHandle* handle, gdouble* out_width, gdouble* out_height);
 void rsvg_handle_get_intrinsic_dimensions(RsvgHandle* handle,
                                           gboolean* out_has_width,

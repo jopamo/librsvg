@@ -61,6 +61,13 @@ This fork includes a back-ported implementation of `rsvg_handle_set_stylesheet` 
 
 Unlike the original 2.40.x codebase which resolved styles only during parsing, this version captures node metadata (tag names, classes, IDs) and supports a full tree restyle when a new stylesheet is injected. This ensures that `currentColor` and class-based symbolic styling work as expected in modern GTK4 environments.
 
+### Supported CSS
+
+The CSS support is powered by `libcroco` (as in stock 2.40) and covers standard SVG 1.1 styling attributes and CSS2 selectors.
+*   Selectors: `*`, `tag`, `.class`, `#id`, and combinations.
+*   Properties: Standard SVG presentation attributes (fill, stroke, etc.).
+*   **Differences from 2.48+**: This C implementation does not support the full CSS3/CSS4 feature set found in the Rust version (e.g., complex pseudo-classes, variables other than `currentColor`).
+
 ## License
 
 See `COPYING`.
